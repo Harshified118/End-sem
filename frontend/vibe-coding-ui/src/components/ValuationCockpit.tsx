@@ -11,6 +11,7 @@ import {
   Sliders,
   CheckCircle2,
   AlertTriangle,
+  ChevronDown,
 } from "lucide-react";
 import { PredictPayload } from "@/lib/api";
 
@@ -20,6 +21,122 @@ interface ValuationCockpitProps {
   onSubmit: (payload: PredictPayload) => Promise<void>;
   isLoading: boolean;
   prefillData?: Partial<PredictPayload> | null;
+}
+
+export interface SneakerModelOption {
+  name: string;
+  retail: number;
+  days: number;
+  size?: number;
+}
+
+export const BRAND_MODELS_CATALOG: Record<string, SneakerModelOption[]> = {
+  Yeezy: [
+    { name: "Yeezy Boost 350 V2 Zebra", retail: 220, days: 45, size: 10.5 },
+    { name: "Yeezy Boost 350 V2 Beluga 2.0", retail: 220, days: 90, size: 10.0 },
+    { name: "Yeezy Boost 350 V2 Cream White", retail: 220, days: 60, size: 9.5 },
+    { name: "Yeezy Boost 350 V2 Butter", retail: 220, days: 40, size: 10.5 },
+    { name: "Yeezy Boost 350 V2 Blue Tint", retail: 220, days: 60, size: 10.0 },
+    { name: "Yeezy Boost 350 V2 Static", retail: 220, days: 30, size: 10.5 },
+    { name: "Yeezy Boost 350 V2 Semi Frozen Yellow", retail: 220, days: 80, size: 11.0 },
+    { name: "Yeezy Boost 350 V2 Sesame", retail: 220, days: 70, size: 10.0 },
+    { name: "adidas Yeezy Slide Onyx", retail: 70, days: 15, size: 11.0 },
+    { name: "adidas Yeezy Foam Runner Ararat", retail: 75, days: 20, size: 10.0 },
+    { name: "adidas Yeezy Boost 700 Wave Runner", retail: 300, days: 120, size: 10.5 },
+  ],
+  "Off-White": [
+    { name: "Off-White x Air Jordan 1 Chicago", retail: 190, days: 120, size: 10.5 },
+    { name: "Off-White x Nike Air Presto", retail: 160, days: 180, size: 10.0 },
+    { name: "Nike Air Presto Off-White Black", retail: 160, days: 180, size: 10.0 },
+    { name: "Nike Air VaporMax Off-White", retail: 250, days: 150, size: 10.5 },
+    { name: "Air Jordan 1 Retro High Off-White University Blue", retail: 190, days: 100, size: 10.5 },
+    { name: "Nike Blazer Mid Off-White Grim Reaper", retail: 130, days: 90, size: 9.5 },
+    { name: "Nike Blazer Mid Off-White All Hallows Eve", retail: 130, days: 90, size: 10.0 },
+    { name: "Nike Air Max 90 Off-White Black", retail: 160, days: 140, size: 10.5 },
+    { name: "Nike Air Force 1 Low Off-White Volt", retail: 170, days: 110, size: 9.5 },
+    { name: "Nike Zoom Fly Off-White Pink", retail: 170, days: 90, size: 10.0 },
+  ],
+  Jordan: [
+    { name: "Air Jordan 1 Retro High Chicago", retail: 180, days: 30, size: 10.5 },
+    { name: "Travis Scott x AJ1 Reverse Mocha", retail: 150, days: 90, size: 10.5 },
+    { name: "Air Jordan 1 Retro High Bred Banned", retail: 180, days: 60, size: 10.0 },
+    { name: "Air Jordan 4 Retro Bred Reimagined", retail: 215, days: 45, size: 10.5 },
+    { name: "Air Jordan 4 Retro Military Blue", retail: 215, days: 30, size: 10.0 },
+    { name: "Air Jordan 3 Retro White Cement Reimagined", retail: 210, days: 60, size: 10.5 },
+    { name: "Air Jordan 11 Retro Concord", retail: 220, days: 365, size: 11.0 },
+    { name: "Air Jordan 4 Retro SB Pine Green", retail: 225, days: 120, size: 10.5 },
+  ],
+  Nike: [
+    { name: "Nike Dunk Low Retro Panda", retail: 115, days: 60, size: 9.5 },
+    { name: "Nike SB Dunk Low Travis Scott", retail: 150, days: 180, size: 10.5 },
+    { name: "Nike SB Dunk Low Chunky Dunky", retail: 100, days: 240, size: 10.0 },
+    { name: "Nike Air Force 1 '07 Triple White", retail: 115, days: 10, size: 10.0 },
+    { name: "Nike Dunk Low Syracuse Orange", retail: 100, days: 90, size: 9.5 },
+    { name: "Nike Air Max 1 Travis Scott Cactus Jack", retail: 160, days: 120, size: 10.5 },
+    { name: "Nike SB Dunk Low Born x Raised", retail: 130, days: 150, size: 10.0 },
+    { name: "Nike SB Dunk Low Jarritos", retail: 130, days: 180, size: 10.5 },
+  ],
+  adidas: [
+    { name: "adidas Samba OG Cloud White", retail: 100, days: 30, size: 9.5 },
+    { name: "adidas Gazelle Indoor Core Black", retail: 120, days: 45, size: 10.0 },
+    { name: "adidas Campus 00s Core Black", retail: 110, days: 60, size: 9.5 },
+    { name: "adidas Forum Low White Royal", retail: 100, days: 90, size: 10.0 },
+    { name: "adidas Ultra Boost 1.0 Triple White", retail: 190, days: 180, size: 10.5 },
+    { name: "adidas Stan Smith Cloud White Green", retail: 100, days: 365, size: 10.0 },
+    { name: "adidas Superstar Core Black White", retail: 100, days: 180, size: 10.0 },
+    { name: "adidas Bad Bunny Campus Chalk White", retail: 160, days: 90, size: 10.5 },
+  ],
+  "New Balance": [
+    { name: "New Balance 990v5 Grey", retail: 185, days: 90, size: 10.5 },
+    { name: "New Balance 550 White Grey", retail: 110, days: 45, size: 10.0 },
+    { name: "New Balance 2002R Protection Pack Rain Cloud", retail: 150, days: 60, size: 10.5 },
+    { name: "New Balance 990v6 Grey", retail: 200, days: 30, size: 10.5 },
+    { name: "New Balance 992 Grey", retail: 175, days: 120, size: 10.0 },
+    { name: "New Balance 1906R Metallic Silver", retail: 155, days: 40, size: 10.0 },
+    { name: "New Balance 550 Aimé Leon Dore Green", retail: 130, days: 180, size: 10.5 },
+  ],
+  Converse: [
+    { name: "Converse Chuck Taylor All-Star 70 High Black", retail: 90, days: 60, size: 10.0 },
+    { name: "Converse Chuck 70 Off-White Clear", retail: 130, days: 300, size: 10.5 },
+    { name: "Converse Run Star Hike Black", retail: 110, days: 90, size: 9.5 },
+  ],
+  ASICS: [
+    { name: "ASICS GEL-Kayano 14 Metallic Plum", retail: 150, days: 45, size: 10.5 },
+    { name: "ASICS GT-2160 White Pure Silver", retail: 120, days: 30, size: 10.0 },
+    { name: "ASICS GEL-NYC Cream Steel Grey", retail: 130, days: 60, size: 10.5 },
+  ],
+  Puma: [
+    { name: "Puma Suede Classic XXI Black", retail: 75, days: 60, size: 10.0 },
+    { name: "Puma Palermo OG Blue White", retail: 90, days: 45, size: 9.5 },
+    { name: "Puma MB.01 LaMelo Ball Red Blast", retail: 125, days: 120, size: 10.5 },
+  ],
+  Reebok: [
+    { name: "Reebok Club C 85 Vintage Chalk", retail: 90, days: 45, size: 10.0 },
+    { name: "Reebok Question Mid Iverson", retail: 160, days: 90, size: 10.5 },
+  ],
+  Salomon: [
+    { name: "Salomon XT-6 Black Phantom", retail: 200, days: 60, size: 10.5 },
+    { name: "Salomon ACS Pro Advanced Silver", retail: 220, days: 90, size: 10.0 },
+  ],
+  Crocs: [
+    { name: "Crocs Pollex Clog Salehe Bembury Menemsha", retail: 85, days: 120, size: 10.0 },
+    { name: "Crocs Classic Clog Black", retail: 50, days: 30, size: 10.0 },
+  ],
+};
+
+export function getModelsForBrand(targetBrand: string): SneakerModelOption[] {
+  const normTarget = targetBrand.trim().toLowerCase();
+  const matchedKey = Object.keys(BRAND_MODELS_CATALOG).find(
+    (k) => k.toLowerCase() === normTarget
+  );
+  if (matchedKey && BRAND_MODELS_CATALOG[matchedKey]) {
+    return BRAND_MODELS_CATALOG[matchedKey];
+  }
+  return [
+    { name: `${targetBrand} Classic Low`, retail: 120, days: 30, size: 10.0 },
+    { name: `${targetBrand} Retro High`, retail: 150, days: 60, size: 10.5 },
+    { name: `${targetBrand} Runner Pro`, retail: 160, days: 90, size: 10.0 },
+  ];
 }
 
 const PRESET_SNEAKERS = [
@@ -54,6 +171,8 @@ export function ValuationCockpit({
 }: ValuationCockpitProps) {
   const [brand, setBrand] = useState<string>("Yeezy");
   const [sneakerName, setSneakerName] = useState<string>("Yeezy Boost 350 V2 Zebra");
+  const [isCustomModel, setIsCustomModel] = useState<boolean>(false);
+  const [customModelName, setCustomModelName] = useState<string>("");
   const [retailPrice, setRetailPrice] = useState<number>(220);
   const [shoeSize, setShoeSize] = useState<number>(10.5);
   const [daysSinceRelease, setDaysSinceRelease] = useState<number>(45);
@@ -61,24 +180,71 @@ export function ValuationCockpit({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const brandsList = supportedBrands.length > 0 ? supportedBrands : FALLBACK_BRANDS;
+  const availableModels = getModelsForBrand(brand);
 
   // Sync prefillData when user clicks from Front Shoe Scroll Rail or History
   useEffect(() => {
     if (prefillData) {
       if (prefillData.brand) setBrand(prefillData.brand);
-      if (prefillData.sneaker_name) setSneakerName(prefillData.sneaker_name);
+      if (prefillData.sneaker_name) {
+        const targetBrand = prefillData.brand || brand;
+        const models = getModelsForBrand(targetBrand);
+        const match = models.find(
+          (m) => m.name.toLowerCase() === prefillData.sneaker_name?.toLowerCase()
+        );
+        if (match) {
+          setSneakerName(match.name);
+          setIsCustomModel(false);
+          setCustomModelName("");
+        } else {
+          setSneakerName(prefillData.sneaker_name);
+          setIsCustomModel(true);
+          setCustomModelName(prefillData.sneaker_name);
+        }
+      }
       if (prefillData.retail_price) setRetailPrice(prefillData.retail_price);
       if (prefillData.shoe_size) setShoeSize(prefillData.shoe_size);
       if (prefillData.days_since_release !== undefined) setDaysSinceRelease(prefillData.days_since_release);
       if (prefillData.threshold !== undefined) setThreshold(prefillData.threshold);
     }
-  }, [prefillData]);
+  }, [prefillData, brand]);
 
   const handleBrandSelect = (selectedBrand: string) => {
     setBrand(selectedBrand);
-    if (defaultRetailMap[selectedBrand]) {
+    const models = getModelsForBrand(selectedBrand);
+    if (models.length > 0) {
+      const first = models[0];
+      setSneakerName(first.name);
+      setRetailPrice(first.retail);
+      setDaysSinceRelease(first.days);
+      if (first.size) setShoeSize(first.size);
+      setIsCustomModel(false);
+      setCustomModelName("");
+    } else if (defaultRetailMap[selectedBrand]) {
       setRetailPrice(defaultRetailMap[selectedBrand]);
     }
+  };
+
+  const handleModelChange = (selectedModelName: string) => {
+    if (selectedModelName === "__CUSTOM__") {
+      setIsCustomModel(true);
+      setCustomModelName(sneakerName);
+      return;
+    }
+    setIsCustomModel(false);
+    setSneakerName(selectedModelName);
+    const models = getModelsForBrand(brand);
+    const match = models.find((m) => m.name === selectedModelName);
+    if (match) {
+      setRetailPrice(match.retail);
+      setDaysSinceRelease(match.days);
+      if (match.size) setShoeSize(match.size);
+    }
+  };
+
+  const handleCustomModelChange = (text: string) => {
+    setCustomModelName(text);
+    setSneakerName(text);
   };
 
   const handleSelectPreset = (preset: (typeof PRESET_SNEAKERS)[0]) => {
@@ -87,6 +253,8 @@ export function ValuationCockpit({
     setRetailPrice(preset.retail);
     setShoeSize(preset.size);
     setDaysSinceRelease(preset.days);
+    setIsCustomModel(false);
+    setCustomModelName("");
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -115,13 +283,15 @@ export function ValuationCockpit({
       return;
     }
 
+    const finalSneakerName = isCustomModel ? customModelName.trim() : sneakerName.trim();
+
     try {
       await onSubmit({
         brand,
         retail_price: Number(retailPrice),
         shoe_size: Number(shoeSize),
         days_since_release: Number(daysSinceRelease),
-        sneaker_name: sneakerName.trim() || undefined,
+        sneaker_name: finalSneakerName || undefined,
         threshold: Number(threshold),
       });
     } catch {
@@ -150,6 +320,8 @@ export function ValuationCockpit({
           onClick={() => {
             setBrand("Yeezy");
             setSneakerName("Yeezy Boost 350 V2 Zebra");
+            setIsCustomModel(false);
+            setCustomModelName("");
             setRetailPrice(220);
             setShoeSize(10.5);
             setDaysSinceRelease(45);
@@ -202,7 +374,7 @@ export function ValuationCockpit({
             <select
               value={brand}
               onChange={(e) => handleBrandSelect(e.target.value)}
-              className="w-full bg-zinc-950 border-2 border-zinc-700 hover:border-zinc-500 rounded-2xl px-5 py-4 text-base sm:text-lg text-white font-mono font-bold focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-all cursor-pointer shadow-inner"
+              className="w-full bg-zinc-950 border-2 border-zinc-700 hover:border-zinc-500 rounded-2xl px-5 py-4 text-base sm:text-lg text-white font-mono font-bold focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-all cursor-pointer shadow-inner appearance-none pr-12"
             >
               {brandsList.map((b) => (
                 <option key={b} value={b} className="bg-zinc-900 text-white font-mono font-bold py-2">
@@ -210,6 +382,9 @@ export function ValuationCockpit({
                 </option>
               ))}
             </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-5 text-[#bef264]">
+              <ChevronDown className="w-5 h-5" />
+            </div>
           </div>
 
           {/* Quick Brand Shortcut Pills */}
@@ -234,18 +409,82 @@ export function ValuationCockpit({
           </div>
         </div>
 
-        {/* Sneaker Model Name Input (Optional Keyword Filter) */}
+        {/* Sneaker Model Name Dynamic Dropdown (Pops out relevant models for the selected brand) */}
         <div>
-          <label className="block text-sm sm:text-base font-mono uppercase tracking-wider text-zinc-200 mb-2 font-bold">
-            Sneaker Model Name <span className="text-zinc-500 font-normal font-sans text-xs">(e.g. Zebra, Chicago, Travis Scott)</span>
-          </label>
-          <input
-            type="text"
-            value={sneakerName}
-            onChange={(e) => setSneakerName(e.target.value)}
-            placeholder="e.g. Yeezy Boost 350 V2 Zebra"
-            className="w-full bg-zinc-950 border-2 border-zinc-800 rounded-2xl px-5 py-3.5 text-base sm:text-lg text-white font-medium placeholder-zinc-500 focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-colors"
-          />
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm sm:text-base font-mono uppercase tracking-wider text-zinc-200 font-bold flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-zinc-800 text-[#bef264] border border-[#bef264]/40 font-black flex items-center justify-center text-xs">
+                ★
+              </span>
+              Sneaker Model Name (Dropdown)
+            </label>
+            <span className="text-xs font-mono text-[#bef264] font-medium flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#bef264]" />
+              {availableModels.length} {brand} Models
+            </span>
+          </div>
+
+          <div className="relative">
+            <select
+              value={isCustomModel ? "__CUSTOM__" : sneakerName}
+              onChange={(e) => handleModelChange(e.target.value)}
+              className="w-full bg-zinc-950 border-2 border-zinc-700 hover:border-zinc-500 rounded-2xl px-5 py-4 text-base sm:text-lg text-white font-mono font-bold focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-all cursor-pointer shadow-inner appearance-none pr-12"
+            >
+              <optgroup label={`Select ${brand} Model`} className="bg-zinc-900 text-white font-mono font-bold">
+                {availableModels.map((m) => (
+                  <option key={m.name} value={m.name} className="bg-zinc-900 text-white font-mono font-bold py-2">
+                    {m.name} (MSRP: ${m.retail})
+                  </option>
+                ))}
+              </optgroup>
+              <option value="__CUSTOM__" className="bg-zinc-800 text-[#bef264] font-mono font-bold py-2">
+                ✏️ Custom / Type Another Model...
+              </option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-5 text-[#bef264]">
+              <ChevronDown className="w-5 h-5" />
+            </div>
+          </div>
+
+          {/* If custom model option is active, show text input */}
+          {isCustomModel && (
+            <div className="mt-3">
+              <input
+                type="text"
+                value={customModelName}
+                onChange={(e) => handleCustomModelChange(e.target.value)}
+                placeholder={`Type custom ${brand} model name...`}
+                className="w-full bg-zinc-950 border-2 border-[#bef264]/60 rounded-2xl px-5 py-3.5 text-base sm:text-lg text-white font-medium placeholder-zinc-500 focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-colors"
+                autoFocus
+              />
+            </div>
+          )}
+
+          {/* Quick Model Shortcut Chips for current brand */}
+          <div className="flex flex-wrap gap-2 mt-3">
+            {availableModels.slice(0, 5).map((m) => {
+              const isSelected = !isCustomModel && sneakerName === m.name;
+              // Clean short label for chip
+              const shortLabel =
+                m.name
+                  .replace(new RegExp(`^(${brand}|Adidas|Nike|Air Jordan|Air|New Balance)\\s+`, "i"), "")
+                  .trim() || m.name;
+              return (
+                <button
+                  key={m.name}
+                  type="button"
+                  onClick={() => handleModelChange(m.name)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all border cursor-pointer ${
+                    isSelected
+                      ? "bg-[#bef264] text-zinc-950 border-[#bef264] shadow-sm"
+                      : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700"
+                  }`}
+                >
+                  {shortLabel}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* 2 & 3. ORIGINAL SHOP PRICE & SHOE SIZE */}
