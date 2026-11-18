@@ -8,6 +8,22 @@ import type { CatalogSneaker } from "@/lib/sneakers";
 const TOTAL_FRAMES = 36;
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH || "";
 
+export function isSoleFrame(shoe: CatalogSneaker, frameIndex: number): boolean {
+  if (shoe.brand === "Nike" || shoe.id.includes("dunk") || shoe.id.includes("nike")) {
+    const norm = ((frameIndex % TOTAL_FRAMES) + TOTAL_FRAMES) % TOTAL_FRAMES;
+    return (norm >= 8 && norm <= 11) || (norm >= 26 && norm <= 29);
+  }
+  return false;
+}
+
+export function sanitizeFrame(shoe: CatalogSneaker, frameIndex: number): number {
+  const norm = ((frameIndex % TOTAL_FRAMES) + TOTAL_FRAMES) % TOTAL_FRAMES;
+  if (isSoleFrame(shoe, norm)) {
+    return norm >= 8 && norm <= 11 ? 7 : 25;
+  }
+  return norm;
+}
+
 export function frameUrl(shoeId: string, index: number): string {
   const normalized = ((index % TOTAL_FRAMES) + TOTAL_FRAMES) % TOTAL_FRAMES;
   const pad = String(normalized + 1).padStart(2, "0");
@@ -24,24 +40,54 @@ export function Shoe360({ shoe, onTap, reducedMotion }: Shoe360Props) {
   const [frame, setFrame] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [spinning, setSpinning] = useState(!reducedMotion);
+  const [ready, setReady] = useState(false);
   const drag = useRef({ x: 0, frame: 0, moved: false });
   const driftRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const preloaded = useRef<Set<string>>(new Set());
 
-  const getFrame = useCallback((index: number) => frameUrl(shoe.id, index), [shoe.id]);
+  const spriteId = shoe.spriteId || shoe.id;
+  const getFrame = useCallback(
+    (index: number) => frameUrl(spriteId, sanitizeFrame(shoe, index)),
+    [spriteId, shoe]
+  );
+
+  useEffect(() => {
+    setReady(false);
+    preloaded.current = new Set();
+    let cancelled = false;
+
+    const warm = async () => {
+      const urls = Array.from({ length: TOTAL_FRAMES }, (_, index) => getFrame(index));
+      await Promise.all(
+        urls.map(
+          (src) =>
+            new Promise<void>((resolve) => {
+              const image = new window.Image();
+              image.decoding = "async";
+              image.onload = () => {
+                preloaded.current.add(src);
+                resolve();
+              };
+              image.onerror = () => resolve();
+              image.src = src;
+            })
+        )
+      );
+      if (!cancelled) setReady(true);
+    };
+
+    void warm();
+    return () => {
+      cancelled = true;
+    };
+  }, [getFrame]);
 
   useEffect(() => {
     if (!spinning || reducedMotion) return;
-    const id = window.setInterval(() => setFrame((prev) => (prev + 1) % TOTAL_FRAMES), 90);
+    const id = window.setInterval(() => setFrame((prev) => (prev + 1) % TOTAL_FRAMES), 80);
     return () => window.clearInterval(id);
   }, [spinning, reducedMotion]);
-
-  useEffect(() => {
-    [0, 6, 12, 18, 24, 30].forEach((index) => {
-      const image = new window.Image();
-      image.src = getFrame(index);
-    });
-  }, [getFrame]);
 
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
     try {
@@ -58,7 +104,7 @@ export function Shoe360({ shoe, onTap, reducedMotion }: Shoe360Props) {
     const deltaX = event.clientX - drag.current.x;
     if (Math.abs(deltaX) > 6) drag.current.moved = true;
     if (dragging) {
-      const next = drag.current.frame + Math.round(deltaX / 9);
+      const next = drag.current.frame + Math.round(deltaX / 8);
       setFrame(((next % TOTAL_FRAMES) + TOTAL_FRAMES) % TOTAL_FRAMES);
     }
     if (!reducedMotion && driftRef.current && stageRef.current) {
@@ -113,28 +159,30 @@ export function Shoe360({ shoe, onTap, reducedMotion }: Shoe360Props) {
           dragging ? "cursor-grabbing" : "cursor-grab"
         }`}
       >
-        <div className="relative flex h-[220px] w-full items-center justify-center sm:h-[280px] lg:h-[320px]">
-          <div className="hero-shadow pointer-events-none absolute bottom-3 h-7 w-2/3 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.85)_0%,rgba(0,0,0,0.35)_55%,transparent_78%)]" />
+        <div className="relative flex h-[280px] w-full items-center justify-center sm:h-[360px] lg:h-[420px]">
+          <div className="hero-shadow pointer-events-none absolute bottom-4 h-8 w-[70%] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.85)_0%,rgba(0,0,0,0.35)_55%,transparent_78%)]" />
           <div ref={driftRef} className="transition-transform duration-300 ease-out will-change-transform">
-            <div className="hero-float">
+            <div className={`hero-float ${ready ? "opacity-100" : "opacity-80"} transition-opacity duration-300`}>
               <Image
                 src={getFrame(frame)}
                 alt={shoe.name}
                 draggable={false}
-                width={720}
-                height={360}
-                loading="eager"
+                width={1600}
+                height={900}
+                priority
+                sizes="(max-width: 640px) 90vw, (max-width: 1024px) 55vw, 640px"
                 data-testid="hero-frame"
-                className="pointer-events-none h-auto max-h-[300px] w-auto max-w-full select-none object-contain drop-shadow-[0_18px_28px_rgba(0,0,0,0.75)] sm:max-h-[340px]"
+                className="pointer-events-none h-auto max-h-[260px] w-auto max-w-[min(100%,640px)] select-none object-contain drop-shadow-[0_22px_36px_rgba(0,0,0,0.8)] sm:max-h-[340px] lg:max-h-[400px]"
+                style={{ imageRendering: "auto" }}
               />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-1 flex items-center justify-center gap-1.5 text-12 text-ink-3">
+      <div className="mt-2 flex items-center justify-center gap-1.5 text-12 text-ink-3">
         <Rotate3d className="size-3.5 text-accent-readable" aria-hidden="true" />
-        <span>Tap the shoe for details</span>
+        <span>Drag to rotate · Tap for details</span>
         {reducedMotion ? null : (
           <button
             type="button"

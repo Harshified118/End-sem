@@ -25,4 +25,13 @@ for (const removed of [
   assert(!exists(removed), `${removed} must be deleted in the redesign`);
 }
 
+// Verification for expanded Nike catalog and sole frame filtering
+const sneakersSrc = read("src/lib/sneakers.ts");
+assert(sneakersSrc.includes("Nike SB Dunk Low Travis Scott"), "Must include Nike SB Dunk Low Travis Scott");
+assert(sneakersSrc.includes("Nike SB Dunk Low Chunky Dunky"), "Must include Nike SB Dunk Low Chunky Dunky");
+assert(sneakersSrc.includes("Nike Air Force 1 '07 Triple White"), "Must include Nike Air Force 1");
+
+const shoe360Src = read("src/components/Shoe360.tsx");
+assert(shoe360Src.includes("isSoleFrame") || shoe360Src.includes("filterNikeFrame") || shoe360Src.includes("sanitizeFrame"), "Shoe360 must filter out sole-exposed frames for Nike shoes");
+
 console.log("PASS: 3D depth atoms verification passed");

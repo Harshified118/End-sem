@@ -19,6 +19,8 @@ export interface CatalogSneaker {
   tag: string;
   rarity: string;
   hype: string;
+  /** Optional sprite folder override for 360 WebP sequence */
+  spriteId?: string;
 }
 
 export const REFERENCE_SNEAKERS: CatalogSneaker[] = [
@@ -69,6 +71,46 @@ export const REFERENCE_SNEAKERS: CatalogSneaker[] = [
     tag: "HIGH VOLUME",
     rarity: "Everyday staple",
     hype: "Mass appeal — constant restocks",
+    spriteId: "dunk-panda",
+  },
+  {
+    id: "nike-travis-dunk",
+    name: "Nike SB Dunk Low Travis Scott",
+    brand: "Nike",
+    retail: 150,
+    resale: 1650,
+    size: 10.5,
+    days: 180,
+    tag: "CACTUS JACK // SB",
+    rarity: "Grail tier",
+    hype: "Ultra rare — instant sellout",
+    spriteId: "dunk-panda",
+  },
+  {
+    id: "nike-chunky-dunky",
+    name: "Nike SB Dunk Low Chunky Dunky",
+    brand: "Nike",
+    retail: 100,
+    resale: 1350,
+    size: 10.0,
+    days: 240,
+    tag: "BEN & JERRY'S",
+    rarity: "Collector grail",
+    hype: "Historic pop collaboration",
+    spriteId: "dunk-panda",
+  },
+  {
+    id: "nike-af1-white",
+    name: "Nike Air Force 1 '07 Triple White",
+    brand: "Nike",
+    retail: 115,
+    resale: 140,
+    size: 10.0,
+    days: 10,
+    tag: "ICONIC CLASSIC",
+    rarity: "Everyday staple",
+    hype: "Global streetwear classic",
+    spriteId: "dunk-panda",
   },
   {
     id: "nb-990",
