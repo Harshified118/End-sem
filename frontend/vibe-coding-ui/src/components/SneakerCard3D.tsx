@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React from "react";
 import {
   CheckCircle2,
   XCircle,
@@ -8,12 +8,14 @@ import {
   TrendingDown,
   Percent,
   Database,
-  HelpCircle,
   Layers,
   Sparkles,
+  ArrowUpRight,
+  ArrowDownRight,
 } from "lucide-react";
 import { PredictResponse } from "@/lib/api";
 import { AnimatedPriceCounter } from "./AnimatedPriceCounter";
+import { HoloTiltCard } from "./motion/HoloTiltCard";
 
 interface SneakerCard3DProps {
   result: PredictResponse | null;
@@ -21,260 +23,198 @@ interface SneakerCard3DProps {
 }
 
 export function SneakerCard3D({ result, isLoading }: SneakerCard3DProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [rotateX, setRotateX] = useState<number>(0);
-  const [rotateY, setRotateY] = useState<number>(0);
-  const [glarePosition, setGlarePosition] = useState<{ x: number; y: number; opacity: number }>({
-    x: 50,
-    y: 50,
-    opacity: 0,
-  });
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-
-    // Calculate rotation between -12 and 12 degrees
-    const rX = -((mouseY - height / 2) / (height / 2)) * 10;
-    const rY = ((mouseX - width / 2) / (width / 2)) * 10;
-
-    setRotateX(rX);
-    setRotateY(rY);
-
-    // Calculate glare percentage
-    const gX = (mouseX / width) * 100;
-    const gY = (mouseY / height) * 100;
-    setGlarePosition({ x: gX, y: gY, opacity: 0.15 });
-  };
-
-  const handleMouseLeave = () => {
-    setRotateX(0);
-    setRotateY(0);
-    setGlarePosition((prev) => ({ ...prev, opacity: 0 }));
-  };
-
   if (isLoading) {
     return (
-      <div className="w-full h-full min-h-[480px] bg-[#10121a] border border-white/[0.08] rounded-2xl p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
-        <div className="relative flex items-center justify-center w-20 h-20 mb-6">
-          <div className="absolute inset-0 rounded-full border-2 border-zinc-700 border-t-white animate-spin" />
-          <div className="w-10 h-10 rounded-full bg-white/[0.04] flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white animate-pulse" />
+      <HoloTiltCard className="w-full">
+        <div className="w-full min-h-[520px] p-8 flex flex-col items-center justify-center text-center relative">
+          <div className="relative flex items-center justify-center w-24 h-24 mb-6">
+            <div className="absolute inset-0 rounded-full border-4 border-zinc-800 border-t-[#bef264] animate-spin" />
+            <div className="w-14 h-14 rounded-full bg-zinc-900 flex items-center justify-center">
+              <Sparkles className="w-7 h-7 text-[#bef264] animate-pulse" />
+            </div>
           </div>
+          <h3 className="text-xl font-black text-white font-sans uppercase">
+            Evaluating Random Forest Trees
+          </h3>
+          <p className="text-sm text-zinc-300 mt-2 max-w-sm font-sans leading-relaxed">
+            Deriving hype keywords & calculating secondary market arbitrage yield...
+          </p>
         </div>
-        <h3 className="text-base font-semibold text-white font-sans">
-          Evaluating Random Forest Trees
-        </h3>
-        <p className="text-xs text-slate-400 mt-2 max-w-xs font-sans">
-          Deriving hype indicator vectors & running regression inference...
-        </p>
-      </div>
+      </HoloTiltCard>
     );
   }
 
   if (!result) {
     return (
-      <div
-        ref={cardRef}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        style={{
-          transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
-          transition: "transform 0.15s ease-out",
-        }}
-        className="w-full h-full min-h-[480px] bg-[#10121a] border border-white/[0.08] rounded-2xl p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group cursor-crosshair select-none"
-      >
-        {/* Specular glare layer */}
-        <div
-          className="absolute inset-0 pointer-events-none rounded-2xl transition-opacity duration-300"
-          style={{
-            background: `radial-gradient(circle 350px at ${glarePosition.x}% ${glarePosition.y}%, rgba(255, 255, 255, ${glarePosition.opacity}), transparent)`,
-          }}
-        />
-
-        <div className="w-20 h-20 rounded-2xl bg-zinc-900 border border-white/[0.08] flex items-center justify-center mb-5 text-slate-400 group-hover:scale-110 transition-transform duration-300 shadow-xl">
-          <Layers className="w-8 h-8 text-white" />
+      <HoloTiltCard className="w-full">
+        <div className="w-full min-h-[520px] p-8 flex flex-col items-center justify-center text-center group">
+          <div className="w-24 h-24 rounded-3xl bg-zinc-900 border-2 border-zinc-800 flex items-center justify-center mb-6 text-zinc-400 group-hover:scale-110 transition-transform duration-300 shadow-2xl">
+            <Layers className="w-10 h-10 text-[#bef264]" />
+          </div>
+          <div className="text-xs font-mono uppercase tracking-widest text-[#bef264] font-bold mb-1">
+            // 3D INTERACTIVE VALUATION STAGE
+          </div>
+          <h3 className="text-xl sm:text-2xl font-black text-white font-sans uppercase">
+            Awaiting Valuation Input
+          </h3>
+          <p className="text-sm sm:text-base text-zinc-300 mt-3 max-w-sm font-sans leading-relaxed">
+            Select or configure a sneaker on the left to compute secondary market arbitrage yield.
+          </p>
+          <div className="mt-8 flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-zinc-300">
+            <Database className="w-4 h-4 text-[#bef264]" />
+            <span>Trained on 94,355 StockX Transactions</span>
+          </div>
         </div>
-        <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold mb-1">
-          // 3D INTERACTIVE VALUATION STAGE
-        </div>
-        <h3 className="text-base font-semibold text-white font-sans">
-          Awaiting Valuation Input
-        </h3>
-        <p className="text-xs text-slate-400 mt-2 max-w-sm font-sans leading-relaxed">
-          Hover and tilt to explore 3D stage. Select or configure a sneaker on the left to compute secondary market arbitrage yield.
-        </p>
-        <div className="mt-6 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] text-[11px] font-mono text-slate-400">
-          <Database className="w-3.5 h-3.5 text-zinc-300" />
-          <span>Trained on 94,355 StockX Transactions</span>
-        </div>
-      </div>
+      </HoloTiltCard>
     );
   }
 
   const isCop = result.verdict === "COP";
-  const profitPositive = result.estimated_profit >= 0;
+  const originalPrice = result.retail_price;
+  const estimatedResale = result.estimated_resale_price;
+  const isHigher = estimatedResale > originalPrice;
+  const diffAmount = Math.abs(estimatedResale - originalPrice);
 
   return (
-    <div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
-        transition: "transform 0.15s ease-out",
-      }}
-      className={`w-full bg-[#10121a] border rounded-2xl p-6 lg:p-8 relative overflow-hidden shadow-2xl transition-shadow select-none ${
-        isCop ? "border-emerald-500/40 glow-cop" : "border-rose-500/40 glow-drop"
-      }`}
-    >
-      {/* Specular glare layer */}
-      <div
-        className="absolute inset-0 pointer-events-none rounded-2xl transition-opacity duration-300"
-        style={{
-          background: `radial-gradient(circle 400px at ${glarePosition.x}% ${glarePosition.y}%, rgba(255, 255, 255, ${glarePosition.opacity}), transparent)`,
-        }}
-      />
+    <HoloTiltCard className="w-full">
+      <div className="w-full space-y-6">
+        {/* Top Bar: Sneaker Name & COP/DROP Stamp */}
+        <div className="flex items-center justify-between pb-6 border-b border-zinc-800/80 gap-3">
+          <div>
+            <span className="text-xs font-mono uppercase tracking-widest text-zinc-400 font-bold block mb-1">
+              // STOCKX VALUATION RESULT
+            </span>
+            <h2 className="text-xl sm:text-2xl font-black text-white font-sans tracking-tight">
+              {result.sneaker_name || `${result.brand} Release`}
+            </h2>
+          </div>
 
-      {/* Top Bar: Verdict Badge */}
-      <div className="flex items-center justify-between pb-6 border-b border-white/[0.08]">
-        <div>
-          <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold block mb-1">
-            // STOCKX VALUATION VERDICT
-          </span>
-          <h2 className="text-lg font-bold text-white font-sans tracking-tight">
-            {result.sneaker_name || `${result.brand} Release`}
-          </h2>
+          {/* Verdict Stamp Badge */}
+          <div
+            style={{ filter: "url(#squiggly-0)" }}
+            className={`flex items-center gap-2.5 px-5 py-2.5 rounded-2xl border-2 text-base font-black font-mono tracking-wider shadow-xl ${
+              isCop
+                ? "bg-emerald-950/80 border-emerald-500 text-emerald-400"
+                : "bg-rose-950/80 border-rose-500 text-rose-400"
+            }`}
+          >
+            {isCop ? (
+              <>
+                <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                <span>COP</span>
+              </>
+            ) : (
+              <>
+                <XCircle className="w-6 h-6 text-rose-400" />
+                <span>DROP</span>
+              </>
+            )}
+          </div>
         </div>
 
-        {/* Verdict Stamp Badge */}
+        {/* MENTOR EVALUATION BANNER (EXACT PHRASING REQUIRED BY FACULTY MENTOR) */}
         <div
-          style={{ filter: "url(#squiggly-0)" }}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-black font-mono tracking-wider shadow-lg ${
-            isCop
-              ? "bg-emerald-500/15 border-emerald-500/50 text-emerald-400"
-              : "bg-rose-500/15 border-rose-500/50 text-rose-400"
+          className={`p-5 rounded-2xl border-2 shadow-2xl transition-all ${
+            isHigher
+              ? "bg-emerald-950/80 border-emerald-500/80 text-emerald-200"
+              : "bg-rose-950/80 border-rose-500/80 text-rose-200"
           }`}
         >
-          {isCop ? (
-            <>
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-              <span>COP (BUY)</span>
-            </>
-          ) : (
-            <>
-              <XCircle className="w-5 h-5 text-rose-400" />
-              <span>DROP (SKIP)</span>
-            </>
-          )}
-        </div>
-      </div>
+          <div className="flex items-center justify-between text-xs font-mono uppercase tracking-widest font-black mb-1.5">
+            <span className="text-zinc-400">// FACULTY EVALUATION DIRECTIVE</span>
+            <span className={isHigher ? "text-emerald-400 font-bold" : "text-rose-400 font-bold"}>
+              {isHigher ? "ABOVE ORIGINAL PRICE" : "BELOW ORIGINAL PRICE"}
+            </span>
+          </div>
 
-      {/* Valuation Primary Metric with Animated Rolling Counter */}
-      <div className="py-6 border-b border-white/[0.08]">
-        <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block mb-1">
-          Predicted Resale Price (Secondary Market)
-        </span>
-        <div className="flex items-baseline gap-3">
-          <span className="text-4xl lg:text-5xl font-extrabold text-white font-mono tracking-tight">
-            <AnimatedPriceCounter value={result.estimated_resale_price} />
-          </span>
-          <span className="text-xs font-mono text-slate-400">USD</span>
-        </div>
-      </div>
-
-      {/* Financial Metrics Grid */}
-      <div className="grid grid-cols-2 gap-4 py-6 border-b border-white/[0.08]">
-        {/* Estimated Profit */}
-        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block mb-1 flex items-center gap-1.5">
-            {profitPositive ? (
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-            ) : (
-              <TrendingDown className="w-3.5 h-3.5 text-rose-400" />
-            )}
-            Estimated Net Profit
-          </span>
-          <span
-            className={`text-2xl font-bold font-mono tracking-tight ${
-              profitPositive ? "text-emerald-400" : "text-rose-400"
-            }`}
-          >
-            {profitPositive ? "+" : ""}
-            ${result.estimated_profit.toFixed(2)}
-          </span>
+          <div className="text-xl sm:text-2xl font-black font-mono tracking-tight flex items-center gap-2 flex-wrap mt-1">
+            <span
+              className={`px-3 py-1 rounded-xl text-lg font-black shadow-md ${
+                isHigher ? "bg-emerald-500 text-zinc-950" : "bg-rose-500 text-white"
+              }`}
+            >
+              {isHigher ? "COP" : "DROP"}
+            </span>
+            <span className="text-white">
+              ; <strong className={isHigher ? "text-emerald-400 font-black" : "text-rose-400 font-black"}>${diffAmount.toFixed(2)}</strong> {isHigher ? "above the original price" : "below the original price"}
+            </span>
+          </div>
         </div>
 
-        {/* Profit Margin % */}
-        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block mb-1 flex items-center gap-1.5">
-            <Percent className="w-3.5 h-3.5 text-zinc-300" />
-            Return on Retail (ROI)
+        {/* Primary Metric: Estimated Resale Price */}
+        <div className="py-2">
+          <span className="text-sm font-mono uppercase tracking-wider text-zinc-300 font-bold block mb-1">
+            Estimated Resale Price (Secondary Market)
           </span>
-          <span
-            className={`text-2xl font-bold font-mono tracking-tight ${
-              profitPositive ? "text-emerald-400" : "text-rose-400"
-            }`}
-          >
-            {profitPositive ? "+" : ""}
-            {result.profit_margin_pct.toFixed(2)}%
-          </span>
+          <div className="flex items-baseline gap-3">
+            <span className="text-5xl sm:text-6xl font-black text-white font-mono tracking-tight">
+              <AnimatedPriceCounter value={result.estimated_resale_price} />
+            </span>
+            <span className="text-base font-mono text-zinc-400 font-bold">USD ($)</span>
+          </div>
         </div>
-      </div>
 
-      {/* Baseline Context Chips */}
-      <div className="grid grid-cols-3 gap-2 py-4 border-b border-white/[0.08] text-center">
-        <div className="p-2 rounded-lg bg-white/[0.02]">
-          <span className="text-[10px] font-mono uppercase text-slate-400 block">Retail MSRP</span>
-          <span className="text-xs font-mono font-semibold text-slate-200">
-            ${result.retail_price.toFixed(2)}
-          </span>
-        </div>
-        <div className="p-2 rounded-lg bg-white/[0.02]">
-          <span className="text-[10px] font-mono uppercase text-slate-400 block">Size (US)</span>
-          <span className="text-xs font-mono font-semibold text-slate-200">
-            US {result.shoe_size.toFixed(1)}
-          </span>
-        </div>
-        <div className="p-2 rounded-lg bg-white/[0.02]">
-          <span className="text-[10px] font-mono uppercase text-slate-400 block">Elapsed Days</span>
-          <span className="text-xs font-mono font-semibold text-slate-200">
-            {result.days_since_release}d
-          </span>
-        </div>
-      </div>
+        {/* 2-Column Financial Breakdown */}
+        <div className="grid grid-cols-2 gap-4 py-4 border-t border-zinc-800/80">
+          {/* Net Profit / Loss */}
+          <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800">
+            <span className="text-xs font-mono uppercase tracking-wider text-zinc-400 block mb-1 font-bold flex items-center gap-1.5">
+              {result.estimated_profit >= 0 ? (
+                <ArrowUpRight className="w-4 h-4 text-emerald-400" />
+              ) : (
+                <ArrowDownRight className="w-4 h-4 text-rose-400" />
+              )}
+              Net Profit / Loss
+            </span>
+            <span
+              className={`text-2xl sm:text-3xl font-black font-mono tracking-tight ${
+                result.estimated_profit >= 0 ? "text-emerald-400" : "text-rose-400"
+              }`}
+            >
+              {result.estimated_profit >= 0 ? "+" : ""}
+              ${result.estimated_profit.toFixed(2)}
+            </span>
+          </div>
 
-      {/* Technical Rationale Banner */}
-      <div className="mt-6 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] flex items-start gap-3">
-        <HelpCircle className="w-4 h-4 text-zinc-300 shrink-0 mt-0.5" />
-        <div className="text-xs text-slate-300 leading-relaxed font-sans">
-          {isCop ? (
-            <p>
-              <strong className="text-emerald-400 font-semibold">Recommendation: COP (Buy).</strong> Estimated resale yields a profit margin of{" "}
-              <strong>+{result.profit_margin_pct.toFixed(1)}%</strong> (${result.estimated_profit.toFixed(2)}), exceeding your configured hurdle rate. Positive arbitrage spread.
-            </p>
-          ) : (
-            <p>
-              <strong className="text-rose-400 font-semibold">Recommendation: DROP (Skip).</strong> Estimated yield of{" "}
-              <strong>{result.profit_margin_pct.toFixed(1)}%</strong> (${result.estimated_profit.toFixed(2)}) is below the target hurdle threshold. Buying carries capital depreciation risk.
-            </p>
-          )}
+          {/* ROI Margin % */}
+          <div className="p-4 rounded-2xl bg-zinc-950 border border-zinc-800">
+            <span className="text-xs font-mono uppercase tracking-wider text-zinc-400 block mb-1 font-bold flex items-center gap-1.5">
+              <Percent className="w-4 h-4 text-[#bef264]" />
+              Margin on Retail (ROI)
+            </span>
+            <span
+              className={`text-2xl sm:text-3xl font-black font-mono tracking-tight ${
+                result.estimated_profit >= 0 ? "text-emerald-400" : "text-rose-400"
+              }`}
+            >
+              {result.estimated_profit >= 0 ? "+" : ""}
+              {result.profit_margin_pct.toFixed(1)}%
+            </span>
+          </div>
+        </div>
+
+        {/* Baseline Input Attribute Summary Chips */}
+        <div className="grid grid-cols-3 gap-3 pt-3 border-t border-zinc-800/80 text-center">
+          <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
+            <span className="text-xs font-mono uppercase text-zinc-400 font-bold block">Original Shop Price</span>
+            <span className="text-base font-mono font-black text-white mt-0.5 block">
+              ${result.retail_price.toFixed(2)}
+            </span>
+          </div>
+          <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
+            <span className="text-xs font-mono uppercase text-zinc-400 font-bold block">US Shoe Size</span>
+            <span className="text-base font-mono font-black text-white mt-0.5 block">
+              {result.shoe_size.toFixed(1)}
+            </span>
+          </div>
+          <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
+            <span className="text-xs font-mono uppercase text-zinc-400 font-bold block">Holding Period</span>
+            <span className="text-base font-mono font-black text-white mt-0.5 block">
+              {result.days_since_release} Days
+            </span>
+          </div>
         </div>
       </div>
-
-      {/* SQLite Log Confirmation */}
-      <div className="mt-4 flex items-center justify-between text-[11px] font-mono text-slate-400">
-        <span className="flex items-center gap-1.5">
-          <Database className="w-3 h-3 text-emerald-400" />
-          Prediction recorded to data/droporcop.db
-        </span>
-        <span className="text-[10px] uppercase tracking-wider">3D Tilt Active</span>
-      </div>
-    </div>
+    </HoloTiltCard>
   );
 }

@@ -111,58 +111,27 @@ export function PinnedParallaxHero({ onExploreClick }: PinnedParallaxHeroProps) 
           {/* Central 3D Sneaker Visual Stage */}
           <div
             ref={shoeVisualRef}
-            className="w-full max-w-lg aspect-[16/10] relative rounded-3xl border border-zinc-800/80 bg-gradient-to-b from-zinc-900/50 via-zinc-950/90 to-zinc-950 p-6 flex flex-col items-center justify-center shadow-2xl backdrop-blur-md overflow-hidden group"
+            className="w-full max-w-lg aspect-[16/10] relative rounded-3xl border-2 border-zinc-800 bg-zinc-950 p-3 flex flex-col items-center justify-center shadow-2xl backdrop-blur-md overflow-hidden group"
           >
-            {/* Subtle background glow circle */}
-            <div className="absolute inset-0 bg-radial from-white/[0.04] to-transparent pointer-events-none" />
+            {/* Real Sneaker Product Photo */}
+            <div className="w-full h-full rounded-2xl overflow-hidden relative">
+              <img
+                src="/shoes/jordan-chicago.jpg"
+                alt="Air Jordan 1 Retro High Chicago"
+                className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent pointer-events-none" />
 
-            {/* Stylized Vector Sneaker Graphic with Specular Holographic Sheen */}
-            <svg
-              viewBox="0 0 360 200"
-              className="w-4/5 h-auto drop-shadow-[0_20px_35px_rgba(0,0,0,0.85)] filter group-hover:scale-105 transition-transform duration-500"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {/* Sole */}
-              <path
-                d="M30 150 C70 152 140 155 240 155 C290 155 330 145 335 130 C335 125 320 125 305 125 C260 125 150 128 35 136 Z"
-                fill="#18181b"
-                stroke="#3f3f46"
-                strokeWidth="2"
-              />
-              <path
-                d="M35 136 C100 132 200 132 305 125 C315 125 325 118 320 110 C290 95 240 92 195 95 C165 97 140 85 110 82 C80 80 50 100 32 120 Z"
-                fill="#27272a"
-                stroke="#52525b"
-                strokeWidth="1.5"
-              />
-              {/* Collar & Tongue */}
-              <path
-                d="M110 82 C125 55 150 45 175 42 C185 41 190 50 190 62 C190 75 195 95 195 95 Z"
-                fill="#09090b"
-                stroke="#bef264"
-                strokeWidth="1.5"
-              />
-              {/* Off-White Style Accent Swoosh / Zip Line */}
-              <path
-                d="M80 115 C130 95 200 85 270 98"
-                stroke="#bef264"
-                strokeWidth="3.5"
-                strokeLinecap="round"
-              />
-              {/* Monospace Spec Stamp */}
-              <text x="75" y="142" fill="#71717a" fontSize="7" fontFamily="monospace" fontWeight="bold">
-                STOCKX SPEC: AJ1-HIGH-OFFWHITE // 2018-Q2
-              </text>
-            </svg>
-
-            {/* Specular Status HUD Overlay */}
-            <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-[10px] font-mono text-zinc-400">
-              <span className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#bef264] animate-ping" />
-                <span>SPECIMEN // 001</span>
-              </span>
-              <span className="text-zinc-500">RESALE SPREAD: +142.8%</span>
+              {/* Specular Status HUD Overlay */}
+              <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs font-mono font-bold text-zinc-300">
+                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-700">
+                  <span className="w-2 h-2 rounded-full bg-[#bef264] animate-ping" />
+                  <span>SPECIMEN // AIR JORDAN 1 CHICAGO</span>
+                </span>
+                <span className="px-2.5 py-1 rounded-lg bg-[#bef264] text-zinc-950 font-black">
+                  SPREAD: +142.8%
+                </span>
+              </div>
             </div>
           </div>
 

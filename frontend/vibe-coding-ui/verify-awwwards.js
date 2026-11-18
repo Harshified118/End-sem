@@ -40,11 +40,12 @@ async function verify() {
 
     // Assert key components
     const hasHero = await page.locator("text=MACHINE INTELLIGENCE").first().isVisible();
-    const hasRail = await page.locator("text=FEATURED SPECIMENS").first().isVisible();
+    const hasRail = await page.locator("text=FEATURED SNEAKERS").first().isVisible();
     const hasMarquee = await page.locator("text=STOCKX REAL-TIME SPREAD TICKER").first().isVisible();
-    const hasCockpit = await page.locator("text=Arbitrage Valuation Parameters").first().isVisible();
+    const hasCockpit = await page.locator("text=VALUATION INPUT PARAMETERS").first().isVisible();
+    const hasMentorBanner = await page.locator("text=FACULTY EVALUATION DIRECTIVE").first().isVisible();
 
-    console.log(`[QA] Elements: Hero=${hasHero}, Rail=${hasRail}, Marquee=${hasMarquee}, Cockpit=${hasCockpit}`);
+    console.log(`[QA] Elements: Hero=${hasHero}, Rail=${hasRail}, Marquee=${hasMarquee}, Cockpit=${hasCockpit}, MentorBanner=${hasMentorBanner}`);
 
     if (!hasHero || !hasRail || !hasMarquee || !hasCockpit) {
       throw new Error(`Component visibility assertion failed: Hero=${hasHero}, Rail=${hasRail}, Marquee=${hasMarquee}, Cockpit=${hasCockpit}`);

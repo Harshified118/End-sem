@@ -6,11 +6,11 @@ import {
   Calendar,
   Layers,
   ArrowRight,
-  TrendingUp,
   RotateCcw,
   Sparkles,
   Sliders,
-  Check,
+  CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 import { PredictPayload } from "@/lib/api";
 
@@ -24,9 +24,10 @@ interface ValuationCockpitProps {
 
 const PRESET_SNEAKERS = [
   { name: "Yeezy Boost 350 V2 Zebra", brand: "Yeezy", retail: 220, size: 10.5, days: 45 },
-  { name: "Off-White x Nike Air Presto", brand: "Off-White", retail: 160, size: 10.0, days: 120 },
   { name: "Air Jordan 1 Retro High Chicago", brand: "Jordan", retail: 180, size: 10.5, days: 30 },
+  { name: "Off-White x Nike Air Presto", brand: "Off-White", retail: 160, size: 10.0, days: 120 },
   { name: "Nike Dunk Low Retro Panda", brand: "Nike", retail: 115, size: 9.5, days: 60 },
+  { name: "New Balance 990v5 Grey", brand: "New Balance", retail: 185, size: 10.5, days: 90 },
   { name: "adidas Yeezy Slide Onyx", brand: "Yeezy", retail: 70, size: 11.0, days: 15 },
 ];
 
@@ -37,10 +38,12 @@ const SHOE_SIZES = [
 const DAY_PRESETS = [
   { label: "Drop Day (0d)", days: 0 },
   { label: "1 Month (30d)", days: 30 },
-  { label: "3 Mos (90d)", days: 90 },
-  { label: "6 Mos (180d)", days: 180 },
+  { label: "3 Months (90d)", days: 90 },
+  { label: "6 Months (180d)", days: 180 },
   { label: "1 Year (365d)", days: 365 },
 ];
+
+const FALLBACK_BRANDS = ["Yeezy", "Off-White", "Jordan", "Nike", "adidas", "New Balance"];
 
 export function ValuationCockpit({
   supportedBrands,
@@ -57,7 +60,9 @@ export function ValuationCockpit({
   const [threshold, setThreshold] = useState<number>(0.15);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Sync prefillData when user clicks re-run from history ledger
+  const brandsList = supportedBrands.length > 0 ? supportedBrands : FALLBACK_BRANDS;
+
+  // Sync prefillData when user clicks from Front Shoe Scroll Rail or History
   useEffect(() => {
     if (prefillData) {
       if (prefillData.brand) setBrand(prefillData.brand);
@@ -88,16 +93,25 @@ export function ValuationCockpit({
     if (e) e.preventDefault();
     setErrorMsg(null);
 
-    if (retailPrice <= 0) {
-      setErrorMsg("Retail price must be greater than $0.");
+    // Sensible Numbers Validation (Mentor Requirement)
+    if (!brand || brand.trim() === "") {
+      setErrorMsg("Please select a valid sneaker brand from the dropdown.");
       return;
     }
-    if (shoeSize <= 0) {
-      setErrorMsg("Please select a valid US shoe size.");
+    if (isNaN(retailPrice) || retailPrice <= 0) {
+      setErrorMsg("Original shop price must be a sensible positive amount greater than $0.");
       return;
     }
-    if (daysSinceRelease < 0) {
-      setErrorMsg("Days since release cannot be negative.");
+    if (retailPrice > 5000) {
+      setErrorMsg("Original shop price exceeds standard retail MSRP ($5,000 limit). Please enter a realistic shop price.");
+      return;
+    }
+    if (isNaN(shoeSize) || shoeSize < 3.5 || shoeSize > 18) {
+      setErrorMsg("Please select a standard US men's shoe size between 4.0 and 15.0.");
+      return;
+    }
+    if (isNaN(daysSinceRelease) || daysSinceRelease < 0) {
+      setErrorMsg("Number of days since release cannot be negative.");
       return;
     }
 
@@ -110,24 +124,24 @@ export function ValuationCockpit({
         sneaker_name: sneakerName.trim() || undefined,
         threshold: Number(threshold),
       });
-    } catch (err: any) {
-      setErrorMsg(err.message || "Failed to calculate valuation.");
+    } catch {
+      setErrorMsg("Valuation calculation failed. Please check inputs or try again.");
     }
   };
 
   return (
-    <div className="w-full bg-[#10121a]/90 border border-white/[0.08] rounded-2xl p-6 lg:p-8 backdrop-blur-sm relative overflow-hidden shadow-2xl">
+    <div className="w-full bg-[#121215] border-2 border-zinc-800 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl backdrop-blur-md relative select-none">
       {/* Header */}
-      <div className="flex items-center justify-between pb-6 border-b border-zinc-800/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-zinc-800/80 gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <Sliders className="w-4 h-4 text-[#bef264]" />
-            <h2 className="text-base font-semibold text-white font-sans tracking-tight">
-              Arbitrage Valuation Parameters
+          <div className="flex items-center gap-2.5">
+            <Sliders className="w-6 h-6 text-[#bef264]" />
+            <h2 className="text-xl sm:text-2xl font-black text-white font-sans tracking-tight uppercase">
+              Valuation Input Parameters
             </h2>
           </div>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Input sneaker release attributes to run inference via Random Forest regressor
+          <p className="text-sm sm:text-base text-zinc-300 font-medium mt-1">
+            Enter sneaker attributes to calculate estimated resale price and COP / DROP recommendation.
           </p>
         </div>
 
@@ -142,28 +156,28 @@ export function ValuationCockpit({
             setThreshold(0.15);
             setErrorMsg(null);
           }}
-          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer px-2.5 py-1 rounded-md hover:bg-white/[0.04]"
+          className="inline-flex items-center gap-2 text-sm font-mono font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 w-fit"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
-          <span>Reset</span>
+          <RotateCcw className="w-4 h-4" />
+          <span>Reset Defaults</span>
         </button>
       </div>
 
       {/* Quick Preset Badges */}
-      <div className="py-4 border-b border-zinc-800/80">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-semibold flex items-center gap-1.5">
-            <Sparkles className="w-3 h-3 text-[#bef264]" />
-            Quick Presets
+      <div className="py-5 border-b border-zinc-800/80">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs sm:text-sm font-mono uppercase tracking-wider text-zinc-400 font-bold flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#bef264]" />
+            Quick Test Presets (One-Click)
           </span>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2.5">
           {PRESET_SNEAKERS.map((preset) => (
             <button
               key={preset.name}
               type="button"
               onClick={() => handleSelectPreset(preset)}
-              className="text-xs px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-[#bef264]/10 hover:border-[#bef264]/40 border border-zinc-800 text-zinc-300 hover:text-white transition-all cursor-pointer font-sans"
+              className="text-xs sm:text-sm px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-[#bef264]/10 hover:border-[#bef264]/50 border border-zinc-800 text-zinc-200 hover:text-white font-medium transition-all cursor-pointer"
             >
               {preset.name}
             </button>
@@ -171,126 +185,176 @@ export function ValuationCockpit({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-        {/* Brand Selector Chips */}
+      <form onSubmit={handleSubmit} className="mt-8 space-y-7">
+        {/* 1. SNEAKER BRAND DROPDOWN (Mentor Directive: Use a brand dropdown) */}
         <div>
-          <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-2 font-semibold">
-            Sneaker Brand
-          </label>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-            {(supportedBrands.length > 0 ? supportedBrands : ["Yeezy", "Off-White", "Jordan", "Nike", "adidas", "New Balance"]).map(
-              (b) => {
-                const isSelected = brand.toLowerCase() === b.toLowerCase();
-                return (
-                  <button
-                    key={b}
-                    type="button"
-                    onClick={() => handleBrandSelect(b)}
-                    className={`py-2 px-3 rounded-xl text-xs font-sans font-medium transition-all text-center border cursor-pointer ${
-                      isSelected
-                        ? "bg-[#bef264] text-zinc-950 border-[#bef264] shadow-md shadow-[#bef264]/20 ring-2 ring-[#bef264]/30 font-bold"
-                        : "bg-zinc-900/60 text-zinc-300 border-zinc-800 hover:bg-zinc-800 hover:text-white"
-                    }`}
-                  >
-                    {b}
-                  </button>
-                );
-              }
-            )}
-          </div>
-        </div>
-
-        {/* Sneaker Model Input */}
-        <div>
-          <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-2 font-semibold">
-            Sneaker Model Name <span className="text-zinc-500 font-normal">(Derives hype keywords)</span>
-          </label>
-          <div className="relative">
-            <input
-              type="text"
-              value={sneakerName}
-              onChange={(e) => setSneakerName(e.target.value)}
-              placeholder="e.g. Yeezy Boost 350 V2 Carbon"
-              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#bef264] focus:ring-1 focus:ring-[#bef264] transition-colors font-sans"
-            />
-          </div>
-        </div>
-
-        {/* Retail Price and Shoe Size Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Retail Price */}
-          <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-2 font-semibold">
-              Retail Price ($ USD)
+          <div className="flex items-center justify-between mb-2">
+            <label className="text-sm sm:text-base font-mono uppercase tracking-wider text-zinc-200 font-bold flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-[#bef264] text-zinc-950 font-black flex items-center justify-center text-xs">
+                1
+              </span>
+              Sneaker Brand (Dropdown)
             </label>
+            <span className="text-xs font-mono text-zinc-400 font-medium">Mentor Requirement</span>
+          </div>
+
+          <div className="relative">
+            <select
+              value={brand}
+              onChange={(e) => handleBrandSelect(e.target.value)}
+              className="w-full bg-zinc-950 border-2 border-zinc-700 hover:border-zinc-500 rounded-2xl px-5 py-4 text-base sm:text-lg text-white font-mono font-bold focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-all cursor-pointer shadow-inner"
+            >
+              {brandsList.map((b) => (
+                <option key={b} value={b} className="bg-zinc-900 text-white font-mono font-bold py-2">
+                  {b}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Quick Brand Shortcut Pills */}
+          <div className="flex flex-wrap gap-2 mt-3">
+            {brandsList.map((b) => {
+              const isSelected = brand.toLowerCase() === b.toLowerCase();
+              return (
+                <button
+                  key={b}
+                  type="button"
+                  onClick={() => handleBrandSelect(b)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all border cursor-pointer ${
+                    isSelected
+                      ? "bg-[#bef264] text-zinc-950 border-[#bef264] shadow-sm"
+                      : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700"
+                  }`}
+                >
+                  {b}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Sneaker Model Name Input (Optional Keyword Filter) */}
+        <div>
+          <label className="block text-sm sm:text-base font-mono uppercase tracking-wider text-zinc-200 mb-2 font-bold">
+            Sneaker Model Name <span className="text-zinc-500 font-normal font-sans text-xs">(e.g. Zebra, Chicago, Travis Scott)</span>
+          </label>
+          <input
+            type="text"
+            value={sneakerName}
+            onChange={(e) => setSneakerName(e.target.value)}
+            placeholder="e.g. Yeezy Boost 350 V2 Zebra"
+            className="w-full bg-zinc-950 border-2 border-zinc-800 rounded-2xl px-5 py-3.5 text-base sm:text-lg text-white font-medium placeholder-zinc-500 focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-colors"
+          />
+        </div>
+
+        {/* 2 & 3. ORIGINAL SHOP PRICE & SHOE SIZE */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* 2. Original Shop Price */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm sm:text-base font-mono uppercase tracking-wider text-zinc-200 font-bold flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-[#bef264] text-zinc-950 font-black flex items-center justify-center text-xs">
+                  2
+                </span>
+                Original Shop Price ($ USD)
+              </label>
+            </div>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-                <DollarSign className="w-4 h-4" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#bef264] font-black text-lg">
+                <DollarSign className="w-5 h-5" />
               </div>
               <input
                 type="number"
                 step="1"
-                min="10"
-                max="2000"
+                min="1"
+                max="5000"
                 value={retailPrice}
                 onChange={(e) => setRetailPrice(Number(e.target.value))}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#bef264] focus:ring-1 focus:ring-[#bef264] transition-colors font-mono"
+                className="w-full bg-zinc-950 border-2 border-zinc-800 rounded-2xl pl-11 pr-5 py-3.5 text-base sm:text-lg text-white font-mono font-bold focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-colors"
               />
             </div>
+            <p className="text-xs text-zinc-400 mt-1.5 font-sans">
+              Enter sensible dollar price (e.g. $160 – $220).
+            </p>
           </div>
 
-          {/* Shoe Size */}
+          {/* 3. Shoe Size */}
           <div>
-            <label className="block text-xs font-mono uppercase tracking-wider text-zinc-300 mb-2 font-semibold">
-              Shoe Size (US Men's)
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm sm:text-base font-mono uppercase tracking-wider text-zinc-200 font-bold flex items-center gap-2">
+                <span className="w-6 h-6 rounded-full bg-[#bef264] text-zinc-950 font-black flex items-center justify-center text-xs">
+                  3
+                </span>
+                Shoe Size (US Men's)
+              </label>
+            </div>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400">
-                <Layers className="w-4 h-4" />
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400">
+                <Layers className="w-5 h-5" />
               </div>
               <select
                 value={shoeSize}
                 onChange={(e) => setShoeSize(Number(e.target.value))}
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#bef264] focus:ring-1 focus:ring-[#bef264] transition-colors font-mono appearance-none cursor-pointer"
+                className="w-full bg-zinc-950 border-2 border-zinc-800 rounded-2xl pl-11 pr-5 py-3.5 text-base sm:text-lg text-white font-mono font-bold focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-colors cursor-pointer appearance-none"
               >
                 {SHOE_SIZES.map((size) => (
-                  <option key={size} value={size} className="bg-zinc-900 text-white">
-                    US {size.toFixed(1)}
+                  <option key={size} value={size} className="bg-zinc-900 text-white font-mono font-bold">
+                    US Men's Size {size.toFixed(1)}
                   </option>
                 ))}
               </select>
             </div>
+            <p className="text-xs text-zinc-400 mt-1.5 font-sans">
+              Half-sizes 4.0 to 15.0 per StockX standard.
+            </p>
           </div>
         </div>
 
-        {/* Days Since Release Slider & Quick Presets */}
+        {/* 4. NUMBER OF DAYS SINCE RELEASE */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-mono uppercase tracking-wider text-zinc-300 font-semibold flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-[#bef264]" />
-              Elapsed Holding Period:{" "}
-              <span className="text-[#bef264] font-bold font-mono">{daysSinceRelease} Days</span>
+            <label className="text-sm sm:text-base font-mono uppercase tracking-wider text-zinc-200 font-bold flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-[#bef264] text-zinc-950 font-black flex items-center justify-center text-xs">
+                4
+              </span>
+              Number of Days Since Release
             </label>
+            <span className="text-base sm:text-lg text-[#bef264] font-black font-mono">
+              {daysSinceRelease} Days
+            </span>
           </div>
-          <input
-            type="range"
-            min="0"
-            max="365"
-            step="1"
-            value={daysSinceRelease}
-            onChange={(e) => setDaysSinceRelease(Number(e.target.value))}
-            className="w-full h-2 bg-zinc-950 rounded-lg appearance-none cursor-pointer accent-[#bef264]"
-          />
-          <div className="flex flex-wrap gap-2 mt-2.5">
+
+          <div className="flex items-center gap-4">
+            <input
+              type="range"
+              min="0"
+              max="365"
+              step="1"
+              value={daysSinceRelease}
+              onChange={(e) => setDaysSinceRelease(Number(e.target.value))}
+              className="w-full h-3 bg-zinc-950 rounded-lg appearance-none cursor-pointer accent-[#bef264]"
+            />
+            <input
+              type="number"
+              min="0"
+              max="1000"
+              value={daysSinceRelease}
+              onChange={(e) => setDaysSinceRelease(Math.max(0, Number(e.target.value)))}
+              className="w-24 bg-zinc-950 border-2 border-zinc-800 rounded-xl px-3 py-2 text-center text-base font-mono font-bold text-white focus:outline-none focus:border-[#bef264]"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2 mt-3">
             {DAY_PRESETS.map((p) => (
               <button
                 key={p.days}
                 type="button"
                 onClick={() => setDaysSinceRelease(p.days)}
-                className={`text-[11px] font-mono px-2 py-1 rounded-md border transition-all cursor-pointer ${
+                className={`text-xs sm:text-sm font-mono px-3 py-1.5 rounded-xl border transition-all cursor-pointer font-bold ${
                   daysSinceRelease === p.days
-                    ? "bg-[#bef264]/20 border-[#bef264]/60 text-[#bef264] font-bold"
-                    : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200"
+                    ? "bg-[#bef264] text-zinc-950 border-[#bef264]"
+                    : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white"
                 }`}
               >
                 {p.label}
@@ -299,40 +363,11 @@ export function ValuationCockpit({
           </div>
         </div>
 
-        {/* Arbitrage Profit Margin Threshold Slider */}
-        <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="text-xs font-mono uppercase tracking-wider text-slate-300 font-semibold flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-              Target Hurdle Rate (Threshold):{" "}
-              <span className="text-emerald-400 font-bold font-mono">
-                {(threshold * 100).toFixed(0)}% ROI
-              </span>
-            </label>
-          </div>
-          <p className="text-[11px] text-slate-400 mb-3">
-            COP badge requires predicted resale profit margin $\ge$ {(threshold * 100).toFixed(0)}%.
-          </p>
-          <input
-            type="range"
-            min="0.05"
-            max="0.50"
-            step="0.01"
-            value={threshold}
-            onChange={(e) => setThreshold(Number(e.target.value))}
-            className="w-full h-1.5 bg-[#090a0f] rounded-lg appearance-none cursor-pointer accent-emerald-500"
-          />
-          <div className="flex justify-between text-[10px] font-mono text-slate-500 mt-1">
-            <span>5% Low Risk</span>
-            <span>15% Standard (Default)</span>
-            <span>50% High Arbitrage</span>
-          </div>
-        </div>
-
         {/* Error Alert */}
         {errorMsg && (
-          <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs font-sans">
-            {errorMsg}
+          <div className="p-4 rounded-2xl bg-rose-950/80 border-2 border-rose-500 text-rose-200 text-sm font-medium flex items-center gap-3">
+            <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
+            <span>{errorMsg}</span>
           </div>
         )}
 
@@ -340,17 +375,17 @@ export function ValuationCockpit({
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3.5 px-6 rounded-xl bg-[#bef264] hover:bg-[#a3e635] text-zinc-950 font-black text-sm tracking-tight shadow-lg shadow-[#bef264]/15 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group active:scale-[0.99]"
+          className="w-full py-4 px-8 rounded-2xl bg-[#bef264] hover:bg-[#a3e635] text-zinc-950 font-black text-base sm:text-lg tracking-tight shadow-xl shadow-[#bef264]/20 transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group active:scale-[0.99]"
         >
           {isLoading ? (
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 border-2 border-zinc-950/30 border-t-zinc-950 rounded-full animate-spin" />
-              <span>Calculating Random Forest Valuation...</span>
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 border-3 border-zinc-950/30 border-t-zinc-950 rounded-full animate-spin" />
+              <span>Calculating Model Inference...</span>
             </div>
           ) : (
             <>
-              <span>Calculate Resale Valuation</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <span>CALCULATE RESALE VALUATION (COP / DROP)</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </>
           )}
         </button>
