@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Root-level Playwright capture scripts use CommonJS and are not app source.
+    "capture-*.js",
+    "verify-*.js",
+    "test-model-dropdown.js",
   ]),
 ]);
 

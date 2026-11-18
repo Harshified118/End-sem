@@ -1,23 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  DollarSign,
-  Calendar,
-  Layers,
   ArrowRight,
-  RotateCcw,
-  Sparkles,
-  Sliders,
-  CheckCircle2,
-  AlertTriangle,
   ChevronDown,
+  RotateCcw,
+  TriangleAlert,
 } from "lucide-react";
-import { PredictPayload } from "@/lib/api";
+import type { PredictPayload } from "@/lib/api";
 
 interface ValuationCockpitProps {
   supportedBrands: string[];
   defaultRetailMap: Record<string, number>;
+  trainedBrands?: string[];
   onSubmit: (payload: PredictPayload) => Promise<void>;
   isLoading: boolean;
   prefillData?: Partial<PredictPayload> | null;
@@ -72,7 +67,7 @@ export const BRAND_MODELS_CATALOG: Record<string, SneakerModelOption[]> = {
     { name: "Nike SB Dunk Low Chunky Dunky", retail: 100, days: 240, size: 10.0 },
     { name: "Nike Air Force 1 '07 Triple White", retail: 115, days: 10, size: 10.0 },
     { name: "Nike Dunk Low Syracuse Orange", retail: 100, days: 90, size: 9.5 },
-    { name: "Nike Air Max 1 Travis Scott Cactus Jack", retail: 160, days: 120, size: 10.5 },
+    { name: "Nike Air Max 1 Travis Scott Cactus Jack", retail: 160, days: 180, size: 10.5 },
     { name: "Nike SB Dunk Low Born x Raised", retail: 130, days: 150, size: 10.0 },
     { name: "Nike SB Dunk Low Jarritos", retail: 130, days: 180, size: 10.5 },
   ],
@@ -139,75 +134,102 @@ export function getModelsForBrand(targetBrand: string): SneakerModelOption[] {
   ];
 }
 
-const PRESET_SNEAKERS = [
-  { name: "Yeezy Boost 350 V2 Zebra", brand: "Yeezy", retail: 220, size: 10.5, days: 45 },
-  { name: "Air Jordan 1 Retro High Chicago", brand: "Jordan", retail: 180, size: 10.5, days: 30 },
-  { name: "Off-White x Nike Air Presto", brand: "Off-White", retail: 160, size: 10.0, days: 120 },
-  { name: "Nike Dunk Low Retro Panda", brand: "Nike", retail: 115, size: 9.5, days: 60 },
-  { name: "New Balance 990v5 Grey", brand: "New Balance", retail: 185, size: 10.5, days: 90 },
-  { name: "adidas Yeezy Slide Onyx", brand: "Yeezy", retail: 70, size: 11.0, days: 15 },
-];
-
 const SHOE_SIZES = [
-  4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 14.0, 15.0,
+  4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5,
+  12.0, 12.5, 13.0, 14.0, 15.0,
 ];
 
 const DAY_PRESETS = [
-  { label: "Drop Day (0d)", days: 0 },
-  { label: "1 Month (30d)", days: 30 },
-  { label: "3 Months (90d)", days: 90 },
-  { label: "6 Months (180d)", days: 180 },
-  { label: "1 Year (365d)", days: 365 },
+  { label: "Drop day", days: 0 },
+  { label: "1 month", days: 30 },
+  { label: "3 months", days: 90 },
+  { label: "6 months", days: 180 },
+  { label: "1 year", days: 365 },
 ];
 
 const FALLBACK_BRANDS = ["Yeezy", "Off-White", "Jordan", "Nike", "adidas", "New Balance"];
+const FALLBACK_TRAINED_BRANDS = ["Yeezy", "Off-White"];
+const MAX_RETAIL_PRICE = 5000;
+const MAX_DAYS_SINCE_RELEASE = 36500;
+
+const THRESHOLD_OPTIONS = [
+  { value: 0, label: "0%", hint: "Any profit" },
+  { value: 0.15, label: "15%", hint: "Default" },
+  { value: 0.3, label: "30%", hint: "Cautious" },
+];
 
 export function ValuationCockpit({
   supportedBrands,
   defaultRetailMap,
+  trainedBrands,
   onSubmit,
   isLoading,
   prefillData,
 }: ValuationCockpitProps) {
-  const [brand, setBrand] = useState<string>("Yeezy");
-  const [sneakerName, setSneakerName] = useState<string>("Yeezy Boost 350 V2 Zebra");
-  const [isCustomModel, setIsCustomModel] = useState<boolean>(false);
-  const [customModelName, setCustomModelName] = useState<string>("");
-  const [retailPrice, setRetailPrice] = useState<number>(220);
-  const [shoeSize, setShoeSize] = useState<number>(10.5);
-  const [daysSinceRelease, setDaysSinceRelease] = useState<number>(45);
-  const [threshold, setThreshold] = useState<number>(0.15);
+  const [brand, setBrand] = useState("Yeezy");
+  const [sneakerName, setSneakerName] = useState("Yeezy Boost 350 V2 Zebra");
+  const [isCustomModel, setIsCustomModel] = useState(false);
+  const [customModelName, setCustomModelName] = useState("");
+  const [retailPrice, setRetailPrice] = useState(220);
+  const [shoeSize, setShoeSize] = useState(10.5);
+  const [daysSinceRelease, setDaysSinceRelease] = useState(45);
+  const [threshold, setThreshold] = useState(0.15);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const brandsList = supportedBrands.length > 0 ? supportedBrands : FALLBACK_BRANDS;
+  const trainedList =
+    trainedBrands && trainedBrands.length > 0 ? trainedBrands : FALLBACK_TRAINED_BRANDS;
+  const trainedBrandSet = new Set(trainedList.map((b) => b.toLowerCase()));
+  const isExtrapolatedBrand =
+    brand.trim() !== "" && !trainedBrandSet.has(brand.trim().toLowerCase());
   const availableModels = getModelsForBrand(brand);
 
-  // Sync prefillData when user clicks from Front Shoe Scroll Rail or History
+  // Applies only to a NEW prefill. It deliberately does not depend on `brand`,
+  // so changing the brand afterwards never reapplies a stale prefill.
+  /* eslint-disable react-hooks/set-state-in-effect -- prefill and form edits are external input synced into local form state */
   useEffect(() => {
-    if (prefillData) {
-      if (prefillData.brand) setBrand(prefillData.brand);
-      if (prefillData.sneaker_name) {
-        const targetBrand = prefillData.brand || brand;
-        const models = getModelsForBrand(targetBrand);
-        const match = models.find(
-          (m) => m.name.toLowerCase() === prefillData.sneaker_name?.toLowerCase()
-        );
-        if (match) {
-          setSneakerName(match.name);
-          setIsCustomModel(false);
-          setCustomModelName("");
-        } else {
-          setSneakerName(prefillData.sneaker_name);
-          setIsCustomModel(true);
-          setCustomModelName(prefillData.sneaker_name);
-        }
+    if (!prefillData) return;
+
+    const targetBrand = prefillData.brand;
+    if (targetBrand) {
+      setBrand(targetBrand);
+      const models = getModelsForBrand(targetBrand);
+      const match = prefillData.sneaker_name
+        ? models.find((m) => m.name.toLowerCase() === prefillData.sneaker_name?.toLowerCase())
+        : undefined;
+
+      if (match) {
+        setSneakerName(match.name);
+        setIsCustomModel(false);
+        setCustomModelName("");
+      } else if (prefillData.sneaker_name) {
+        setSneakerName(prefillData.sneaker_name);
+        setIsCustomModel(true);
+        setCustomModelName(prefillData.sneaker_name);
+      } else if (models.length > 0) {
+        setSneakerName(models[0].name);
+        setIsCustomModel(false);
+        setCustomModelName("");
       }
-      if (prefillData.retail_price) setRetailPrice(prefillData.retail_price);
-      if (prefillData.shoe_size) setShoeSize(prefillData.shoe_size);
-      if (prefillData.days_since_release !== undefined) setDaysSinceRelease(prefillData.days_since_release);
-      if (prefillData.threshold !== undefined) setThreshold(prefillData.threshold);
+    } else if (prefillData.sneaker_name) {
+      setSneakerName(prefillData.sneaker_name);
+      setIsCustomModel(true);
+      setCustomModelName(prefillData.sneaker_name);
     }
-  }, [prefillData, brand]);
+
+    if (prefillData.retail_price !== undefined) setRetailPrice(prefillData.retail_price);
+    if (prefillData.shoe_size !== undefined) setShoeSize(prefillData.shoe_size);
+    if (prefillData.days_since_release !== undefined) {
+      setDaysSinceRelease(prefillData.days_since_release);
+    }
+    if (prefillData.threshold !== undefined) setThreshold(prefillData.threshold);
+    setErrorMsg(null);
+  }, [prefillData]);
+
+  useEffect(() => {
+    setErrorMsg(null);
+  }, [brand, sneakerName, customModelName, retailPrice, shoeSize, daysSinceRelease, threshold]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleBrandSelect = (selectedBrand: string) => {
     setBrand(selectedBrand);
@@ -233,8 +255,7 @@ export function ValuationCockpit({
     }
     setIsCustomModel(false);
     setSneakerName(selectedModelName);
-    const models = getModelsForBrand(brand);
-    const match = models.find((m) => m.name === selectedModelName);
+    const match = getModelsForBrand(brand).find((m) => m.name === selectedModelName);
     if (match) {
       setRetailPrice(match.retail);
       setDaysSinceRelease(match.days);
@@ -242,48 +263,34 @@ export function ValuationCockpit({
     }
   };
 
-  const handleCustomModelChange = (text: string) => {
-    setCustomModelName(text);
-    setSneakerName(text);
-  };
-
-  const handleSelectPreset = (preset: (typeof PRESET_SNEAKERS)[0]) => {
-    setBrand(preset.brand);
-    setSneakerName(preset.name);
-    setRetailPrice(preset.retail);
-    setShoeSize(preset.size);
-    setDaysSinceRelease(preset.days);
-    setIsCustomModel(false);
-    setCustomModelName("");
-  };
-
-  const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  const handleSubmit = async (event?: React.FormEvent) => {
+    if (event) event.preventDefault();
     setErrorMsg(null);
 
-    // Sensible Numbers Validation (Mentor Requirement)
     if (!brand || brand.trim() === "") {
-      setErrorMsg("Please select a valid sneaker brand from the dropdown.");
+      setErrorMsg("Choose a brand before checking profit.");
       return;
     }
-    if (isNaN(retailPrice) || retailPrice <= 0) {
-      setErrorMsg("Original shop price must be a sensible positive amount greater than $0.");
+    if (!Number.isFinite(retailPrice) || retailPrice <= 0) {
+      setErrorMsg("Retail price must be greater than $0.");
       return;
     }
-    if (retailPrice > 5000) {
-      setErrorMsg("Original shop price exceeds standard retail MSRP ($5,000 limit). Please enter a realistic shop price.");
+    if (retailPrice > MAX_RETAIL_PRICE) {
+      setErrorMsg(`Retail price cannot exceed $${MAX_RETAIL_PRICE.toLocaleString()}.`);
       return;
     }
-    if (isNaN(shoeSize) || shoeSize < 3.5 || shoeSize > 18) {
-      setErrorMsg("Please select a standard US men's shoe size between 4.0 and 15.0.");
+    if (!Number.isFinite(shoeSize) || shoeSize < 3.5 || shoeSize > 18) {
+      setErrorMsg("Choose a US shoe size between 3.5 and 18.");
       return;
     }
-    if (isNaN(daysSinceRelease) || daysSinceRelease < 0) {
-      setErrorMsg("Number of days since release cannot be negative.");
+    if (!Number.isFinite(daysSinceRelease) || daysSinceRelease < 0) {
+      setErrorMsg("Days since release cannot be negative.");
       return;
     }
-
-    const finalSneakerName = isCustomModel ? customModelName.trim() : sneakerName.trim();
+    if (daysSinceRelease > MAX_DAYS_SINCE_RELEASE) {
+      setErrorMsg(`Days since release cannot exceed ${MAX_DAYS_SINCE_RELEASE.toLocaleString()}.`);
+      return;
+    }
 
     try {
       await onSubmit({
@@ -291,31 +298,26 @@ export function ValuationCockpit({
         retail_price: Number(retailPrice),
         shoe_size: Number(shoeSize),
         days_since_release: Number(daysSinceRelease),
-        sneaker_name: finalSneakerName || undefined,
+        sneaker_name: (isCustomModel ? customModelName.trim() : sneakerName.trim()) || undefined,
         threshold: Number(threshold),
       });
     } catch {
-      setErrorMsg("Valuation calculation failed. Please check inputs or try again.");
+      setErrorMsg("The check failed. Review the inputs or try again.");
     }
   };
 
   return (
-    <div className="w-full bg-[#121215] border-2 border-zinc-800 rounded-3xl p-6 sm:p-8 lg:p-10 shadow-2xl backdrop-blur-md relative select-none">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-zinc-800/80 gap-4">
+    <div className="material-card w-full p-5 sm:p-7">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-hairline pb-5">
         <div>
-          <div className="text-xs font-bold font-sans uppercase tracking-wider text-[#bef264] flex items-center gap-1.5 mb-1">
-            <Sliders className="w-3.5 h-3.5 text-[#bef264]" />
-            <span>VALUATION INPUT PARAMETERS</span>
-          </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-white font-sans tracking-tight">
-            Resale Profit Calculator
+          <p className="text-12 font-semibold uppercase tracking-[0.16em] text-accent-readable">Calculator</p>
+          <h2 className="mt-1 text-22 font-extrabold tracking-tight text-ink-1 sm:text-28">
+            Check a pair
           </h2>
-          <p className="text-sm text-zinc-400 font-medium mt-1">
-            Input sneaker specs to predict secondary market resale value and get an instant COP / DROP verdict.
+          <p className="mt-1 max-w-md text-14 text-ink-3">
+            Enter the pair and your target. The verdict compares projected return with that target.
           </p>
         </div>
-
         <button
           type="button"
           onClick={() => {
@@ -329,240 +331,252 @@ export function ValuationCockpit({
             setThreshold(0.15);
             setErrorMsg(null);
           }}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 w-fit"
+          className="inline-flex items-center gap-1.5 rounded-card border border-hairline bg-inset px-3 py-2 text-12 font-semibold text-ink-3 transition-colors hover:text-ink-1"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
-          <span>Reset Defaults</span>
+          <RotateCcw className="size-3.5" aria-hidden="true" />
+          Reset
         </button>
       </div>
 
-      {/* Quick Preset Badges */}
-      <div className="py-4 border-b border-zinc-800/80">
-        <div className="flex items-center justify-between mb-2.5">
-          <span className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-[#bef264]" />
-            Quick Presets
-          </span>
-          <span className="text-xs text-zinc-400">Click to auto-fill</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {PRESET_SNEAKERS.map((preset) => (
-            <button
-              key={preset.name}
-              type="button"
-              onClick={() => handleSelectPreset(preset)}
-              className="text-xs px-3 py-1.5 rounded-xl bg-zinc-900/90 hover:bg-[#bef264]/15 hover:border-[#bef264]/60 border border-zinc-800 text-zinc-300 hover:text-white font-medium transition-all cursor-pointer"
-            >
-              {preset.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <form onSubmit={handleSubmit} className="mt-6 space-y-6">
-        {/* SNEAKER BRAND */}
+      <form noValidate onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-300">
-              Sneaker Brand
-            </label>
-            <span className="text-xs text-zinc-500 font-sans">Verified StockX catalog</span>
-          </div>
-
+          <label htmlFor="brand-select" className="mb-2 block text-14 font-semibold text-ink-2">
+            Brand
+          </label>
           <div className="relative">
             <select
+              id="brand-select"
               value={brand}
-              onChange={(e) => handleBrandSelect(e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-800 hover:border-zinc-700 focus:border-[#bef264] rounded-2xl px-5 py-3.5 text-base text-white font-semibold font-sans focus:outline-none focus:ring-2 focus:ring-[#bef264]/20 transition-all cursor-pointer appearance-none pr-12 shadow-sm"
+              onChange={(event) => handleBrandSelect(event.target.value)}
+              className="inset-field w-full appearance-none px-4 py-3 pr-11 text-16 font-semibold text-ink-1"
             >
-              {brandsList.map((b) => (
-                <option key={b} value={b} className="bg-zinc-900 text-white font-sans py-2">
-                  {b}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-5 text-zinc-400">
-              <ChevronDown className="w-5 h-5" />
-            </div>
-          </div>
-        </div>
-
-        {/* Sneaker Model Name */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-300">
-              Sneaker Model
-            </label>
-            <span className="text-xs font-medium text-zinc-400 font-sans">
-              {availableModels.length} {brand} models
-            </span>
-          </div>
-
-          <div className="relative">
-            <select
-              value={isCustomModel ? "__CUSTOM__" : sneakerName}
-              onChange={(e) => handleModelChange(e.target.value)}
-              className="w-full bg-zinc-950 border border-zinc-800 hover:border-zinc-700 focus:border-[#bef264] rounded-2xl px-5 py-3.5 text-base text-white font-semibold font-sans focus:outline-none focus:ring-2 focus:ring-[#bef264]/20 transition-all cursor-pointer appearance-none pr-12 shadow-sm"
-            >
-              <optgroup label={`Select ${brand} Model`} className="bg-zinc-900 text-white font-sans">
-                {availableModels.map((m) => (
-                  <option key={m.name} value={m.name} className="bg-zinc-900 text-white font-sans py-2">
-                    {m.name} (MSRP: ${m.retail})
-                  </option>
-                ))}
+              <optgroup label="Trained (StockX)">
+                {brandsList
+                  .filter((b) => trainedBrandSet.has(b.toLowerCase()))
+                  .map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
               </optgroup>
-              <option value="__CUSTOM__" className="bg-zinc-800 text-[#bef264] font-sans font-bold py-2">
-                ✏️ Custom / Type Another Model...
-              </option>
+              {brandsList.some((b) => !trainedBrandSet.has(b.toLowerCase())) && (
+                <optgroup label="Extrapolated (not in training data)">
+                  {brandsList
+                    .filter((b) => !trainedBrandSet.has(b.toLowerCase()))
+                    .map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                </optgroup>
+              )}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-5 text-zinc-400">
-              <ChevronDown className="w-5 h-5" />
-            </div>
+            <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 text-ink-3 [transform:translateY(-50%)]" aria-hidden="true" />
           </div>
-
-          {/* If custom model option is active, show text input */}
-          {isCustomModel && (
-            <div className="mt-3">
-              <input
-                type="text"
-                value={customModelName}
-                onChange={(e) => handleCustomModelChange(e.target.value)}
-                placeholder={`Type custom ${brand} model name...`}
-                className="w-full bg-zinc-950 border border-[#bef264]/60 rounded-2xl px-5 py-3 text-base text-white font-medium placeholder-zinc-500 focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/20 transition-colors"
-                autoFocus
-              />
+          {isExtrapolatedBrand && (
+            <div className="mt-2 flex items-start gap-2 rounded-card border border-warn/40 bg-warn/10 px-3 py-2 text-12 leading-snug text-warn">
+              <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+              <span>
+                {brand} was not in the training data. The model will still estimate a price; treat
+                the margin with extra skepticism.
+              </span>
             </div>
           )}
         </div>
 
-        {/* ORIGINAL SHOP PRICE & SHOE SIZE */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {/* Original Shop Price */}
+        <div>
+          <label htmlFor="model-select" className="mb-2 block text-14 font-semibold text-ink-2">
+            Model
+          </label>
+          <div className="relative">
+            <select
+              id="model-select"
+              value={isCustomModel ? "__CUSTOM__" : sneakerName}
+              onChange={(event) => handleModelChange(event.target.value)}
+              className="inset-field w-full appearance-none px-4 py-3 pr-11 text-16 font-semibold text-ink-1"
+            >
+              {availableModels.map((m) => (
+                <option key={m.name} value={m.name}>
+                  {m.name}
+                </option>
+              ))}
+              <option value="__CUSTOM__">Other — type a model name</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 text-ink-3 [transform:translateY(-50%)]" aria-hidden="true" />
+          </div>
+          {isCustomModel && (
+            <input
+              id="custom-model-input"
+              type="text"
+              value={customModelName}
+              onChange={(event) => {
+                setCustomModelName(event.target.value);
+                setSneakerName(event.target.value);
+              }}
+              placeholder="Model name"
+              autoFocus
+              className="inset-field mt-2 w-full px-4 py-3 text-16 text-ink-1 placeholder:text-ink-3"
+            />
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-300">
-                Original Retail Price ($ USD)
-              </label>
-            </div>
+            <label htmlFor="retail-input" className="mb-2 block text-14 font-semibold text-ink-2">
+              Retail price
+            </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#bef264] font-bold text-base">
-                <DollarSign className="w-5 h-5" />
-              </div>
+              <span className="pointer-events-none absolute left-4 top-1/2 font-mono text-16 font-bold text-accent-readable [transform:translateY(-50%)]">
+                $
+              </span>
               <input
+                id="retail-input"
                 type="number"
                 step="1"
                 min="1"
-                max="5000"
+                max={MAX_RETAIL_PRICE}
                 value={retailPrice}
-                onChange={(e) => setRetailPrice(Number(e.target.value))}
-                className="w-full bg-zinc-950 border border-zinc-800 hover:border-zinc-700 focus:border-[#bef264] rounded-2xl pl-11 pr-5 py-3 text-base text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#bef264]/20 transition-colors shadow-sm"
+                onChange={(event) => setRetailPrice(Number(event.target.value))}
+                className="inset-field w-full py-3 pl-8 pr-4 font-mono text-16 font-bold tabular text-ink-1"
               />
             </div>
           </div>
 
-          {/* Shoe Size */}
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-300">
-                Shoe Size (US Men's)
-              </label>
-            </div>
+            <label htmlFor="size-select" className="mb-2 block text-14 font-semibold text-ink-2">
+              Shoe size
+            </label>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400">
-                <Layers className="w-5 h-5" />
-              </div>
               <select
+                id="size-select"
                 value={shoeSize}
-                onChange={(e) => setShoeSize(Number(e.target.value))}
-                className="w-full bg-zinc-950 border border-zinc-800 hover:border-zinc-700 focus:border-[#bef264] rounded-2xl pl-11 pr-10 py-3 text-base text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#bef264]/20 transition-colors cursor-pointer appearance-none shadow-sm"
+                onChange={(event) => setShoeSize(Number(event.target.value))}
+                className="inset-field w-full appearance-none px-4 py-3 pr-11 font-mono text-16 font-bold tabular text-ink-1"
               >
                 {SHOE_SIZES.map((size) => (
-                  <option key={size} value={size} className="bg-zinc-900 text-white font-mono font-bold">
-                    US Men's Size {size.toFixed(1)}
+                  <option key={size} value={size}>
+                    US {size.toFixed(1)}
                   </option>
                 ))}
               </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-zinc-400">
-                <ChevronDown className="w-4 h-4" />
-              </div>
+              <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 text-ink-3 [transform:translateY(-50%)]" aria-hidden="true" />
             </div>
           </div>
         </div>
 
-        {/* NUMBER OF DAYS SINCE RELEASE */}
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-300">
-              Holding Period / Days Since Release
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <label htmlFor="days-input" className="text-14 font-semibold text-ink-2">
+              Days since release
             </label>
-            <span className="text-sm text-[#bef264] font-bold font-mono">
-              {daysSinceRelease} Days
+            <span className="font-mono text-14 font-bold tabular text-accent-readable">
+              {daysSinceRelease}d
             </span>
           </div>
-
           <div className="flex items-center gap-4">
             <input
+              id="days-slider"
               type="range"
               min="0"
               max="365"
               step="1"
-              value={daysSinceRelease}
-              onChange={(e) => setDaysSinceRelease(Number(e.target.value))}
-              className="w-full h-2 bg-zinc-950 rounded-lg appearance-none cursor-pointer accent-[#bef264]"
+              value={Math.min(daysSinceRelease, 365)}
+              onChange={(event) => setDaysSinceRelease(Number(event.target.value))}
+              aria-label="Days since release slider"
+              className="h-2 w-full cursor-pointer appearance-none rounded-full bg-inset [accent-color:var(--accent)]"
             />
             <input
+              id="days-input"
               type="number"
               min="0"
-              max="1000"
+              max={MAX_DAYS_SINCE_RELEASE}
               value={daysSinceRelease}
-              onChange={(e) => setDaysSinceRelease(Math.max(0, Number(e.target.value)))}
-              className="w-24 bg-zinc-950 border border-zinc-800 focus:border-[#bef264] rounded-xl px-3 py-2 text-center text-sm font-mono font-bold text-white focus:outline-none shadow-sm"
+              onChange={(event) => setDaysSinceRelease(Math.max(0, Number(event.target.value)))}
+              className="inset-field w-24 px-3 py-2 text-center font-mono text-14 font-bold tabular text-ink-1"
             />
           </div>
-
-          <div className="flex flex-wrap gap-2 mt-2.5">
-            {DAY_PRESETS.map((p) => (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {DAY_PRESETS.map((preset) => (
               <button
-                key={p.days}
+                key={preset.days}
                 type="button"
-                onClick={() => setDaysSinceRelease(p.days)}
-                className={`text-xs px-3 py-1 rounded-lg border transition-all cursor-pointer font-semibold ${
-                  daysSinceRelease === p.days
-                    ? "bg-[#bef264] text-zinc-950 border-[#bef264] font-bold"
-                    : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white"
+                onClick={() => setDaysSinceRelease(preset.days)}
+                aria-pressed={daysSinceRelease === preset.days}
+                className={`rounded-card border px-3 py-1.5 text-12 font-semibold transition-colors ${
+                  daysSinceRelease === preset.days
+                    ? "border-accent bg-accent/10 text-accent-readable"
+                    : "border-hairline bg-inset text-ink-3 hover:text-ink-1"
                 }`}
               >
-                {p.label}
+                {preset.label}
               </button>
             ))}
           </div>
+          <p className="mt-2 text-12 text-ink-3">Number of days since release drives the time factor.</p>
         </div>
 
-        {/* Error Alert */}
+        <fieldset>
+          <legend className="mb-2 text-14 font-semibold text-ink-2">
+            Buy if profit ≥ {Math.round(threshold * 100)}%
+          </legend>
+          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Minimum return to recommend buying">
+            {THRESHOLD_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                role="radio"
+                aria-checked={threshold === option.value}
+                tabIndex={threshold === option.value ? 0 : -1}
+                  onClick={() => setThreshold(option.value)}
+                  onKeyDown={(event) => {
+                    if (
+                      event.key !== "ArrowRight" &&
+                      event.key !== "ArrowDown" &&
+                      event.key !== "ArrowLeft" &&
+                      event.key !== "ArrowUp"
+                    ) {
+                      return;
+                    }
+                    event.preventDefault();
+                    const currentIndex = THRESHOLD_OPTIONS.findIndex((item) => item.value === threshold);
+                    const step = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : -1;
+                    const nextIndex =
+                      (currentIndex + step + THRESHOLD_OPTIONS.length) % THRESHOLD_OPTIONS.length;
+                    setThreshold(THRESHOLD_OPTIONS[nextIndex].value);
+                    event.currentTarget.parentElement
+                      ?.querySelectorAll<HTMLButtonElement>('[role="radio"]')
+                      [nextIndex]?.focus();
+                  }}
+                className={`rounded-card border px-3 py-2.5 text-center transition-colors ${
+                  threshold === option.value
+                    ? "border-accent bg-accent text-on-accent"
+                    : "border-hairline bg-inset text-ink-2 hover:text-ink-1"
+                }`}
+              >
+                <span className="block font-mono text-16 font-bold tabular">{option.label}</span>
+                <span className="block text-12 opacity-80">{option.hint}</span>
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-12 text-ink-3">
+            Your verdict is COP only when projected ROI clears this target.
+          </p>
+        </fieldset>
+
         {errorMsg && (
-          <div className="p-4 rounded-2xl bg-rose-950/80 border-2 border-rose-500 text-rose-200 text-sm font-medium flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
+          <div role="alert" className="flex items-start gap-2 rounded-card border border-drop/50 bg-drop/10 px-3 py-2.5 text-14 text-drop">
+            <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
             <span>{errorMsg}</span>
           </div>
         )}
 
-        {/* Submit CTA Button */}
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-4 px-8 rounded-2xl bg-[#bef264] hover:bg-[#a3e635] text-zinc-950 font-black text-base tracking-tight shadow-xl shadow-[#bef264]/20 transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group active:scale-[0.99]"
+          className="flex w-full items-center justify-center gap-2 rounded-card bg-accent px-6 py-3.5 text-16 font-extrabold text-on-accent transition-transform duration-200 hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {isLoading ? (
-            <div className="flex items-center gap-3 font-sans">
-              <div className="w-5 h-5 border-3 border-zinc-950/30 border-t-zinc-950 rounded-full animate-spin" />
-              <span>Calculating Model Inference...</span>
-            </div>
-          ) : (
-            <>
-              <span className="font-extrabold font-sans uppercase tracking-tight">Calculate Resale Valuation & Verdict</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </>
-          )}
+          {isLoading ? "Checking…" : "Get verdict"}
+          {!isLoading && <ArrowRight className="size-4" aria-hidden="true" />}
         </button>
       </form>
     </div>

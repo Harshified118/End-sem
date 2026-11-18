@@ -1,129 +1,221 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ApiError,
   checkApiHealth,
   fetchBrands,
   fetchPredictionHistory,
+  getFallbackBrandsResponse,
   predictResale,
-  HealthResponse,
-  HistoryRecord,
-  PredictPayload,
-  PredictResponse,
+  predictResaleOffline,
+  type HealthResponse,
+  type HistoryRecord,
+  type PredictPayload,
+  type PredictResponse,
 } from "@/lib/api";
+import { scrollToSection } from "@/lib/scroll";
+import { REFERENCE_SNEAKERS, type CatalogSneaker } from "@/lib/sneakers";
 import { Header } from "@/components/Header";
+import { Hero } from "@/components/Hero";
+import { Watchlist } from "@/components/Watchlist";
 import { ValuationCockpit } from "@/components/ValuationCockpit";
 import { SneakerCard3D } from "@/components/SneakerCard3D";
-import { HistoryLedger } from "@/components/HistoryLedger";
 import { ModelDiagnosticsCard } from "@/components/ModelDiagnosticsCard";
-import { SquigglyFilter } from "@/components/motion/SquigglyFilter";
-import { MarketMarquee } from "@/components/motion/MarketMarquee";
-import { PinnedParallaxHero } from "@/components/motion/PinnedParallaxHero";
-import { FrontShoeScrollRail } from "@/components/motion/FrontShoeScrollRail";
-import { Layers } from "lucide-react";
+import { HistoryLedger } from "@/components/HistoryLedger";
+import { AlertTriangle, X } from "lucide-react";
 
-const INITIAL_SAMPLE_VALUATION: PredictResponse = {
-  brand: "Yeezy",
-  sneaker_name: "Yeezy Boost 350 V2 Zebra",
-  retail_price: 220.0,
-  shoe_size: 10.5,
-  days_since_release: 45,
-  estimated_resale_price: 340.91,
-  estimated_profit: 120.91,
-  profit_margin_pct: 54.96,
-  verdict: "COP",
-};
+const HEALTH_RETRY_MS = 2000;
+const HEALTH_MAX_ATTEMPTS = 8;
+const DISCLAIMER =
+  "Estimates from a model trained on Yeezy & Off-White StockX sales. Not financial advice.";
 
 export default function Home() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
   const [supportedBrands, setSupportedBrands] = useState<string[]>([]);
+  const [trainedBrands, setTrainedBrands] = useState<string[]>([]);
   const [defaultRetailMap, setDefaultRetailMap] = useState<Record<string, number>>({});
   const [historyRecords, setHistoryRecords] = useState<HistoryRecord[]>([]);
-  const [activeValuation, setActiveValuation] = useState<PredictResponse | null>(INITIAL_SAMPLE_VALUATION);
+  const [historyTotal, setHistoryTotal] = useState(0);
+  const [activeValuation, setActiveValuation] = useState<PredictResponse | null>(null);
+  const [activeThreshold, setActiveThreshold] = useState(0.15);
   const [prefillData, setPrefillData] = useState<Partial<PredictPayload> | null>(null);
-  const [isPredicting, setIsPredicting] = useState<boolean>(false);
-  const [isRefreshingLedger, setIsRefreshingLedger] = useState<boolean>(false);
+  const [isPredicting, setIsPredicting] = useState(false);
+  const [isRefreshingLedger, setIsRefreshingLedger] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
-  // Initial load: Fetch health, brands, and recent history
+  const requestIdRef = useRef(0);
+  const didBootstrapRef = useRef(false);
+  const healthStatusRef = useRef<string | undefined>(undefined);
+  const modelOnline = Boolean(health?.model_loaded);
+  const healthStatus = health?.status;
+
   const loadInitialData = useCallback(async () => {
-    try {
-      const [hData, bData, histData] = await Promise.all([
-        checkApiHealth(),
-        fetchBrands(),
-        fetchPredictionHistory(15),
-      ]);
-      setHealth(hData);
-      setSupportedBrands(bData.brands);
-      setDefaultRetailMap(bData.default_retail);
-      if (histData.predictions && histData.predictions.length > 0) {
-        setHistoryRecords(histData.predictions);
-      }
-    } catch (err) {
-      console.error("[DropOrCop] Failed to load initial data", err);
+    if (didBootstrapRef.current) return;
+    didBootstrapRef.current = true;
+
+    const healthRes = await checkApiHealth();
+    setHealth(healthRes);
+    healthStatusRef.current = healthRes.status;
+
+    if (healthRes.status === "unreachable") {
+      const fallback = getFallbackBrandsResponse();
+      setSupportedBrands(fallback.brands);
+      setTrainedBrands(fallback.trained_brands ?? ["Yeezy", "Off-White"]);
+      setDefaultRetailMap(fallback.default_retail);
+      setHistoryRecords([]);
+      setHistoryTotal(0);
+      return;
+    }
+
+    const [brandsRes, historyRes] = await Promise.allSettled([
+      fetchBrands(),
+      fetchPredictionHistory(20),
+    ]);
+
+    if (brandsRes.status === "fulfilled") {
+      setSupportedBrands(brandsRes.value.brands);
+      setTrainedBrands(brandsRes.value.trained_brands ?? ["Yeezy", "Off-White"]);
+      setDefaultRetailMap(brandsRes.value.default_retail);
+    }
+    if (historyRes.status === "fulfilled") {
+      setHistoryRecords(historyRes.value.predictions);
+      setHistoryTotal(historyRes.value.total);
     }
   }, []);
 
+  /* eslint-disable react-hooks/set-state-in-effect -- one-time async bootstrap from external APIs */
   useEffect(() => {
-    loadInitialData();
+    void loadInitialData();
   }, [loadInitialData]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
-  // Handle manual health refresh
-  const handleRefreshHealth = async () => {
-    const h = await checkApiHealth();
-    setHealth(h);
-  };
+  useEffect(() => {
+    if (modelOnline || !healthStatus || healthStatus === "unreachable") return;
 
-  // Handle history ledger refresh
-  const handleRefreshLedger = async () => {
+    let attempts = 0;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const poll = async () => {
+      attempts += 1;
+      const latest = await checkApiHealth();
+      if (cancelled) return;
+      setHealth(latest);
+      healthStatusRef.current = latest.status;
+      if (latest.status === "unreachable") return;
+      if (!latest.model_loaded && attempts < HEALTH_MAX_ATTEMPTS) {
+        timer = setTimeout(poll, HEALTH_RETRY_MS);
+      }
+    };
+
+    timer = setTimeout(poll, HEALTH_RETRY_MS);
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+  }, [modelOnline, healthStatus]);
+
+  const handleRefreshHealth = useCallback(async () => {
+    const latest = await checkApiHealth();
+    setHealth(latest);
+    healthStatusRef.current = latest.status;
+  }, []);
+
+  const handleRefreshLedger = useCallback(async () => {
     setIsRefreshingLedger(true);
     try {
       const histData = await fetchPredictionHistory(20);
       setHistoryRecords(histData.predictions);
+      setHistoryTotal(histData.total);
+    } catch (err) {
+      console.error("[DropOrCop] Failed to refresh past checks", err);
+      setActionError(
+        err instanceof ApiError ? err.message : "Couldn't reach the saved checks."
+      );
     } finally {
       setIsRefreshingLedger(false);
     }
-  };
+  }, []);
 
-  // Submit prediction handler
-  const handleCalculateValuation = async (payload: PredictPayload) => {
+  const runPrediction = useCallback(async (payload: PredictPayload) => {
+    const requestId = ++requestIdRef.current;
     setIsPredicting(true);
-    try {
-      const res = await predictResale(payload);
-      setActiveValuation(res);
-      await handleRefreshLedger();
-    } finally {
-      setIsPredicting(false);
-    }
-  };
+    setActionError(null);
+    setActiveThreshold(payload.threshold ?? 0.15);
 
-  // Handle re-test selection from history ledger
+    try {
+      const res =
+        healthStatusRef.current === "unreachable"
+          ? predictResaleOffline(payload)
+          : await predictResale(payload);
+      if (requestId !== requestIdRef.current) return;
+      setActiveValuation(res);
+      if (!res.is_estimate) {
+        try {
+          const histData = await fetchPredictionHistory(20);
+          if (requestId !== requestIdRef.current) return;
+          setHistoryRecords(histData.predictions);
+          setHistoryTotal(histData.total);
+        } catch {
+          // History is best-effort; never fail a valuation over it.
+        }
+      }
+    } catch (err) {
+      if (requestId !== requestIdRef.current) return;
+      console.error("[DropOrCop] Check failed", err);
+      setActionError(err instanceof Error ? err.message : "The check failed. Try again.");
+    } finally {
+      if (requestId === requestIdRef.current) setIsPredicting(false);
+    }
+  }, []);
+
+  const handleCalculateValuation = useCallback(
+    async (payload: PredictPayload) => {
+      await runPrediction(payload);
+    },
+    [runPrediction]
+  );
+
   const handleSelectRecordFromHistory = (rec: HistoryRecord) => {
-    setPrefillData({
+    const payload: PredictPayload = {
       brand: rec.brand,
       retail_price: rec.retail_price,
       shoe_size: rec.shoe_size,
       days_since_release: rec.days_since_release,
       sneaker_name: rec.sneaker_name || undefined,
-    });
-    const cockpitEl = document.getElementById("valuation-cockpit-section");
-    if (cockpitEl) {
-      cockpitEl.scrollIntoView({ behavior: "smooth" });
-    }
+      threshold: 0.15,
+    };
+    setPrefillData(payload);
+    void runPrediction(payload);
+    scrollToSection("valuation-cockpit-section");
   };
 
-  // Handle selection from Front Shoe Scroll Showcase Rail
-  const handleSelectFromShowcase = async (payload: Partial<PredictPayload>) => {
-    setPrefillData(payload);
+  const handleValuateSneaker = useCallback(
+    (
+      sneaker:
+        | Pick<CatalogSneaker, "brand" | "name" | "retail" | "size" | "days">
+        | Partial<PredictPayload>
+    ) => {
+      const payload: Partial<PredictPayload> =
+        "retail" in sneaker
+          ? {
+              brand: sneaker.brand,
+              sneaker_name: sneaker.name,
+              retail_price: sneaker.retail,
+              shoe_size: sneaker.size,
+              days_since_release: sneaker.days,
+            }
+          : sneaker;
 
-    if (
-      payload.brand &&
-      payload.retail_price &&
-      payload.shoe_size !== undefined &&
-      payload.days_since_release !== undefined
-    ) {
-      setIsPredicting(true);
-      try {
-        const res = await predictResale({
+      setPrefillData(payload);
+      if (
+        payload.brand &&
+        payload.retail_price !== undefined &&
+        payload.shoe_size !== undefined &&
+        payload.days_since_release !== undefined
+      ) {
+        void runPrediction({
           brand: payload.brand,
           retail_price: payload.retail_price,
           shoe_size: payload.shoe_size,
@@ -131,127 +223,97 @@ export default function Home() {
           sneaker_name: payload.sneaker_name,
           threshold: 0.15,
         });
-        setActiveValuation(res);
-        await handleRefreshLedger();
-      } catch {
-        // Fallback valuation estimate if API temporarily unreached
-        const estimatedResale = payload.retail_price * 1.55;
-        const profit = estimatedResale - payload.retail_price;
-        setActiveValuation({
-          brand: payload.brand,
-          sneaker_name: payload.sneaker_name,
-          retail_price: payload.retail_price,
-          shoe_size: payload.shoe_size,
-          days_since_release: payload.days_since_release,
-          estimated_resale_price: estimatedResale,
-          estimated_profit: profit,
-          profit_margin_pct: (profit / payload.retail_price) * 100,
-          verdict: profit > 0 ? "COP" : "DROP",
-        });
-      } finally {
-        setIsPredicting(false);
       }
-    }
+      scrollToSection("valuation-cockpit-section");
+    },
+    [runPrediction]
+  );
 
-    const cockpitEl = document.getElementById("valuation-cockpit-section");
-    if (cockpitEl) {
-      cockpitEl.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
-  const handleScrollToCockpit = () => {
-    const cockpitEl = document.getElementById("valuation-cockpit-section");
-    if (cockpitEl) {
-      cockpitEl.scrollIntoView({ behavior: "smooth" });
-    }
+  const handleHeroSelect = (index: number) => {
+    const sneaker = REFERENCE_SNEAKERS[index];
+    if (sneaker) handleValuateSneaker(sneaker);
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col font-sans selection:bg-[#bef264] selection:text-zinc-950 relative overflow-x-clip">
-      {/* SVG Analog Filter Definitions */}
-      <SquigglyFilter />
+    <div className="flex min-h-screen flex-col overflow-x-clip bg-canvas text-ink-1">
+      <Header
+        health={health}
+        onRefreshHealth={handleRefreshHealth}
+        onSelectSneaker={handleValuateSneaker}
+      />
 
-      {/* Global Header */}
-      <Header health={health} onRefreshHealth={handleRefreshHealth} />
+      <Hero
+        onExploreClick={() => scrollToSection("valuation-cockpit-section")}
+        onSelectSneaker={handleHeroSelect}
+      />
 
-      {/* Pinned Parallax Hero with Scroll-Scrub Reveal */}
-      <PinnedParallaxHero onExploreClick={handleScrollToCockpit} />
+      <main className="mx-auto w-full max-w-7xl flex-1 space-y-14 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        {actionError && (
+          <div role="alert" className="flex items-start gap-3 rounded-panel border border-drop/50 bg-drop/10 p-4">
+            <AlertTriangle className="mt-0.5 size-5 shrink-0 text-drop" aria-hidden="true" />
+            <p className="flex-1 text-14 leading-snug text-ink-1">{actionError}</p>
+            <button
+              type="button"
+              onClick={() => setActionError(null)}
+              aria-label="Dismiss message"
+              className="rounded-card p-1 text-ink-3 transition-colors hover:text-ink-1"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+        )}
 
-      {/* Hardware-Accelerated Continuous Market Ticker */}
-      <MarketMarquee />
+        <Watchlist onSelectSneaker={handleValuateSneaker} />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12 relative z-10">
-        {/* Prominent Front-of-UI Smooth Scrollable Sneaker Rail */}
-        <section className="pt-2">
-          <FrontShoeScrollRail onSelectSneaker={handleSelectFromShowcase} />
-        </section>
-
-        {/* 2-Column Valuation Cockpit Grid with 3D Holographic Tilt Stage */}
         <section
           id="valuation-cockpit-section"
-          className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start scroll-mt-24 pt-4"
+          aria-label="verdict"
+          className="grid scroll-mt-20 grid-cols-1 items-start gap-6 lg:grid-cols-12 lg:gap-8"
         >
-          {/* Left Column: Form Controls (7 cols) */}
           <div className="lg:col-span-7">
             <ValuationCockpit
               supportedBrands={supportedBrands}
               defaultRetailMap={defaultRetailMap}
+              trainedBrands={trainedBrands}
               onSubmit={handleCalculateValuation}
               isLoading={isPredicting}
               prefillData={prefillData}
             />
+            <p className="mt-3 text-12 text-ink-3">
+              Every verdict is a model estimate, not a trade signal.
+            </p>
           </div>
-
-          {/* Right Column: 3D Holographic Tilt Valuation Result Stage (5 cols) */}
-          <div className="lg:col-span-5 sticky top-24 space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <span className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-400 flex items-center gap-2">
-                <Layers className="w-3.5 h-3.5 text-[#bef264]" />
-                <span>Arbitrage Appraisal & Verdict</span>
-              </span>
-              <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span>Live Valuation Stage</span>
-              </span>
-            </div>
-            <SneakerCard3D result={activeValuation} isLoading={isPredicting} />
+          <div className="lg:col-span-5 lg:sticky lg:top-20">
+            <SneakerCard3D
+              result={activeValuation}
+              isLoading={isPredicting}
+              threshold={activeThreshold}
+            />
           </div>
         </section>
 
-        {/* Model Diagnostics Section */}
-        <section>
-          <ModelDiagnosticsCard />
-        </section>
+        <ModelDiagnosticsCard />
 
-        {/* Real-Time Prediction Audit Ledger */}
-        <section>
-          <HistoryLedger
-            records={historyRecords}
-            onSelectRecord={handleSelectRecordFromHistory}
-            onRefresh={handleRefreshLedger}
-            isLoading={isRefreshingLedger}
-          />
-        </section>
+        <HistoryLedger
+          records={historyRecords}
+          totalCount={historyTotal}
+          isOffline={!modelOnline}
+          onSelectRecord={handleSelectRecordFromHistory}
+          onRefresh={handleRefreshLedger}
+          isLoading={isRefreshingLedger}
+          onStart={() => scrollToSection("valuation-cockpit-section")}
+        />
       </main>
 
-      {/* Footer */}
-      <footer className="w-full border-t border-zinc-800/80 bg-zinc-950 py-8 text-xs font-sans text-zinc-500 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 text-center sm:text-left">
-            <span className="text-zinc-300 font-bold uppercase tracking-wider">DropOrCop • Group G Project</span>
-            <span className="hidden sm:inline text-zinc-700">•</span>
-            <span>Dept. of Computer Science & Engineering</span>
-            <span className="hidden sm:inline text-zinc-700">•</span>
-            <span>Faculty Mentor: Megha Gupta</span>
-          </div>
-
-          <div className="flex items-center gap-4 font-mono text-[11px] text-zinc-400">
-            <span>Harsh Kumar (31)</span>
-            <span>Anamika Ghosh (32)</span>
-            <span>Sinthoiba Kangjam (34)</span>
-            <span>Himesh Vaskar (35)</span>
-          </div>
+      <footer className="w-full border-t border-hairline py-8">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 sm:px-6 lg:px-8">
+          <p className="text-14 font-bold text-ink-2">
+            DropOrCop · Group G · Department of Computer Science &amp; Engineering · Faculty mentor: Megha Gupta
+          </p>
+          <p className="text-12 text-ink-3">
+            Provenance: a student-trained model built on public StockX sale records.
+          </p>
+          <p className="text-12 text-ink-3">{DISCLAIMER}</p>
         </div>
       </footer>
     </div>

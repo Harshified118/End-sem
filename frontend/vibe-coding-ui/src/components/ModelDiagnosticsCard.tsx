@@ -1,98 +1,75 @@
 "use client";
 
 import React, { useState } from "react";
-import { Cpu, ChevronDown, ChevronUp, CheckCircle, BarChart3, ShieldCheck } from "lucide-react";
+import { ChevronDown, Cpu } from "lucide-react";
+
+const METRICS = [
+  { label: "R²", value: "0.6271", hint: "variance explained" },
+  { label: "MAE", value: "$89.38", hint: "mean absolute error" },
+  { label: "Holdout", value: "19,938", hint: "test transactions" },
+];
 
 export function ModelDiagnosticsCard() {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="w-full bg-[#10121a]/60 border border-white/[0.06] rounded-2xl p-4 sm:p-6 backdrop-blur-sm">
-      <div
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between cursor-pointer select-none"
-      >
-        <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-[#bef264]/10 border border-[#bef264]/20 text-[#bef264]">
-            <Cpu className="w-4 h-4" />
+    <section aria-label="model info" className="material-card w-full p-5 sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="grid size-9 shrink-0 place-items-center rounded-card border border-accent/30 bg-accent/10">
+            <Cpu className="size-4 text-accent-readable" aria-hidden="true" />
           </div>
           <div>
-            <h4 className="text-xs font-semibold text-white font-sans flex items-center gap-2">
-              <span>Phase 4 ML Pipeline & Model Diagnostics</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-normal">
-                Verified R² = 0.6525
-              </span>
-            </h4>
-            <p className="text-[11px] text-slate-400">
-              Evaluated on 18,871 holdout test transactions • Group G Academic Benchmark
+            <p className="text-12 font-semibold uppercase tracking-[0.16em] text-accent-readable">Model info</p>
+            <h3 className="mt-0.5 text-18 font-bold text-ink-1">
+              What the model actually scored
+            </h3>
+            <p className="mt-1 text-12 text-ink-3">
+              Retrained ExtraTrees ensemble on an independent 20% StockX holdout.
             </p>
           </div>
         </div>
 
         <button
           type="button"
-          className="text-slate-400 hover:text-white transition-colors p-1"
-          aria-label="Toggle diagnostics details"
+          onClick={() => setIsOpen((prev) => !prev)}
+          aria-expanded={isOpen}
+          aria-controls="model-info-panel"
+          className="flex items-center gap-1.5 rounded-card border border-hairline bg-inset px-3 py-2 text-12 font-semibold text-ink-3 transition-colors hover:text-ink-1"
         >
-          {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {isOpen ? "Hide details" : "Model details"}
+          <ChevronDown
+            className={`size-3.5 transition-transform duration-200 ${isOpen ? "[transform:rotate(180deg)]" : ""}`}
+            aria-hidden="true"
+          />
         </button>
       </div>
 
-      {isOpen && (
-        <div className="mt-4 pt-4 border-t border-white/[0.06] space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-              <span className="text-[10px] font-mono uppercase text-slate-500 block">
-                Model Architecture
-              </span>
-              <span className="text-xs font-mono font-bold text-white mt-0.5 block">
-                Random Forest
-              </span>
-              <span className="text-[10px] text-slate-400">OneHot + StandardScaler</span>
-            </div>
-
-            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-              <span className="text-[10px] font-mono uppercase text-slate-500 block">
-                Explained Variance
-              </span>
-              <span className="text-xs font-mono font-bold text-emerald-400 mt-0.5 block">
-                R² = 0.6525
-              </span>
-              <span className="text-[10px] text-slate-400">65.3% price variance</span>
-            </div>
-
-            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-              <span className="text-[10px] font-mono uppercase text-slate-500 block">
-                Mean Abs. Error (MAE)
-              </span>
-              <span className="text-xs font-mono font-bold text-white mt-0.5 block">
-                $88.69 USD
-              </span>
-              <span className="text-[10px] text-slate-400">RMSE = $143.71</span>
-            </div>
-
-            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-              <span className="text-[10px] font-mono uppercase text-slate-500 block">
-                Directional Accuracy
-              </span>
-              <span className="text-xs font-mono font-bold text-emerald-400 mt-0.5 block">
-                99.02%
-              </span>
-              <span className="text-[10px] text-slate-400">COP/DROP classification</span>
-            </div>
+      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {METRICS.map((metric) => (
+          <div key={metric.label} className="rounded-card border border-hairline bg-inset px-4 py-3">
+            <p className="text-12 text-ink-3">{metric.label}</p>
+            <p className="mt-0.5 font-mono text-22 font-bold tabular text-ink-1">{metric.value}</p>
+            <p className="mt-0.5 text-12 text-ink-3">{metric.hint}</p>
           </div>
+        ))}
+      </div>
 
-          <div className="flex flex-wrap items-center justify-between text-[11px] font-mono text-slate-400 bg-white/[0.01] p-3 rounded-xl border border-white/[0.04] gap-2">
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#bef264]" />
-              Automated Test Suite: 31/31 unit & stress tests passing
-            </span>
-            <span className="text-slate-500">
-              Artifact: models/best_model.joblib (1.1 MB)
-            </span>
+      {isOpen && (
+        <div id="model-info-panel" className="mt-4 border-t border-hairline pt-4">
+          <div className="grid grid-cols-1 gap-3 text-14 leading-relaxed text-ink-2 sm:grid-cols-2">
+            <p>
+              The project README still lists an earlier evaluation. The retrained values above are
+              current and are the figures used on this page.
+            </p>
+            <p>
+              A residual is the gap between a predicted resale price and the actual sale. The model
+              is strongest on brands it trained on; treat prices for other brands as rough guides.
+              The holdout is separate from the 2023 real-world check set.
+            </p>
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }

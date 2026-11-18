@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export function HoloTiltCard({
   children,
@@ -10,25 +10,36 @@ export function HoloTiltCard({
   className?: string;
 }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const reduceRef = useRef(false);
   const [rotate, setRotate] = useState({ x: 0, y: 0 });
   const [glare, setGlare] = useState({ x: 50, y: 50, opacity: 0 });
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => {
+      reduceRef.current = media.matches;
+    };
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current || reduceRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
     setRotate({
-      x: ((y - centerY) / centerY) * -12,
-      y: ((x - centerX) / centerX) * 12,
+      x: ((y - centerY) / centerY) * -6,
+      y: ((x - centerX) / centerX) * 6,
     });
     setGlare({
       x: (x / rect.width) * 100,
       y: (y / rect.height) * 100,
-      opacity: 0.25,
+      opacity: 0.18,
     });
   };
 
@@ -43,23 +54,23 @@ export function HoloTiltCard({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ perspective: 1000 }}
-      className={`relative rounded-3xl transition-transform duration-200 ease-out ${className}`}
+      className={`relative ${className}`}
     >
       <div
         style={{
           transform: `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
           transformStyle: "preserve-3d",
         }}
-        className="relative overflow-hidden rounded-3xl border-2 border-zinc-800 bg-[#121215] p-6 sm:p-8 backdrop-blur-md transition-transform duration-150 shadow-2xl"
+        className="material-card relative overflow-hidden p-5 transition-transform duration-300 ease-out sm:p-6"
       >
         <div
           style={{
-            background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.4) 0%, transparent 60%)`,
+            background: `radial-gradient(circle at ${glare.x}% ${glare.y}%, rgba(255,255,255,0.28) 0%, transparent 60%)`,
             opacity: glare.opacity,
           }}
           className="pointer-events-none absolute inset-0 z-20 transition-opacity duration-300"
         />
-        <div className="relative z-10" style={{ transform: "translateZ(30px)" }}>
+        <div className="relative z-10" style={{ transform: "translateZ(24px)" }}>
           {children}
         </div>
       </div>

@@ -20,19 +20,21 @@ class DatabaseManager:
 
     @contextmanager
     def _connection(self):
-        """Context manager yielding SQLite connection with WAL mode and guaranteed closing."""
+        """Context manager yielding a SQLite connection with guaranteed closing."""
         conn = sqlite3.connect(str(self.db_path), timeout=10.0)
         conn.row_factory = sqlite3.Row
         try:
-            conn.execute("PRAGMA journal_mode=WAL;")
             conn.execute("PRAGMA synchronous=NORMAL;")
+            conn.execute("PRAGMA foreign_keys=ON;")
             yield conn
         finally:
             conn.close()
 
     def init_db(self) -> None:
-        """Create tables and performance indexes if not existing."""
+        """Create tables, enable WAL once, and add performance indexes."""
         with self._connection() as conn:
+            # WAL is a database-level mode; set it once at startup, not per connection.
+            conn.execute("PRAGMA journal_mode=WAL;")
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS predictions (
@@ -114,7 +116,7 @@ class DatabaseManager:
 
     def get_recent_predictions(self, limit: int = 10) -> List[Dict[str, Any]]:
         """Retrieve recent predictions ordered by timestamp descending."""
-        query = "SELECT * FROM predictions ORDER BY timestamp DESC LIMIT ?;"
+        query = "SELECT * FROM predictions ORDER BY id DESC LIMIT ?;"
         with self._connection() as conn:
             cursor = conn.cursor()
             cursor.execute(query, (limit,))
@@ -122,7 +124,7 @@ class DatabaseManager:
 
     def get_predictions_by_brand(self, brand: str, limit: int = 50) -> List[Dict[str, Any]]:
         """Retrieve predictions for a specific brand."""
-        query = "SELECT * FROM predictions WHERE brand = ? ORDER BY timestamp DESC LIMIT ?;"
+        query = "SELECT * FROM predictions WHERE brand = ? ORDER BY id DESC LIMIT ?;"
         with self._connection() as conn:
             cursor = conn.cursor()
             cursor.execute(query, (brand, limit))
@@ -130,7 +132,7 @@ class DatabaseManager:
 
     def get_predictions_by_verdict(self, verdict: str, limit: int = 50) -> List[Dict[str, Any]]:
         """Retrieve predictions filtered by verdict (COP or DROP)."""
-        query = "SELECT * FROM predictions WHERE verdict = ? ORDER BY timestamp DESC LIMIT ?;"
+        query = "SELECT * FROM predictions WHERE verdict = ? ORDER BY id DESC LIMIT ?;"
         with self._connection() as conn:
             cursor = conn.cursor()
             cursor.execute(query, (verdict, limit))

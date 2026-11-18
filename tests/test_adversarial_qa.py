@@ -5,17 +5,24 @@ boundary values, oversized strings, and concurrent load.
 """
 
 import concurrent.futures
+import math
 import time
 import unittest
+import api.main as api_main
 from fastapi.testclient import TestClient
-from api.main import app, db_manager
+from tests._support import use_temp_ledger
 
 
 class TestAdversarialQA(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.client = TestClient(app)
+        cls._cleanup = use_temp_ledger()
+        cls.client = TestClient(api_main.app)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._cleanup()
 
     # 1. Malformed JSON & Content Types
     def test_malformed_json_syntax(self):
@@ -95,7 +102,7 @@ class TestAdversarialQA(unittest.TestCase):
         self.assertEqual(res.status_code, 400)
 
         # Confirm predictions table was not dropped
-        self.assertGreaterEqual(db_manager.get_prediction_count(), 0)
+        self.assertGreaterEqual(api_main.db_manager.get_prediction_count(), 0)
 
     def test_sql_injection_in_sneaker_name(self):
         """Attempt SQL injection via sneaker_name string."""
@@ -110,7 +117,7 @@ class TestAdversarialQA(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
         # Database parameterization must protect table
-        self.assertGreater(db_manager.get_prediction_count(), 0)
+        self.assertGreater(api_main.db_manager.get_prediction_count(), 0)
 
     def test_xss_payload_in_sneaker_name(self):
         """Verify HTML/XSS strings do not cause unhandled errors."""
@@ -139,11 +146,74 @@ class TestAdversarialQA(unittest.TestCase):
         t0 = time.time()
         res = self.client.post("/predict", json=payload)
         elapsed = time.time() - t0
-        self.assertEqual(res.status_code, 200)
-        # Must execute promptly without ReDoS lockup
+        # Names are capped at 120 chars; anything longer is rejected, not stored.
+        self.assertEqual(res.status_code, 422)
         self.assertLess(elapsed, 1.0)
 
     # 5. High Concurrency Stress Test
+    # 6. Numerical Abuse (NaN / Infinity / Imbalance)
+    def test_nan_retail_price_rejected(self):
+        res = self.client.post(
+            "/predict",
+            content=b'{"brand": "Yeezy", "retail_price": NaN, "shoe_size": 10.0, "days_since_release": 30}',
+            headers={"Content-Type": "application/json"},
+        )
+        self.assertEqual(res.status_code, 422)
+
+    def test_infinity_retail_price_rejected(self):
+        res = self.client.post(
+            "/predict",
+            content=b'{"brand": "Yeezy", "retail_price": 1e400, "shoe_size": 10.0, "days_since_release": 30}',
+            headers={"Content-Type": "application/json"},
+        )
+        self.assertEqual(res.status_code, 422)
+
+    def test_subnormal_retail_price_rejected(self):
+        res = self.client.post(
+            "/predict",
+            json={"brand": "Yeezy", "retail_price": 5e-324, "shoe_size": 10.0, "days_since_release": 30},
+        )
+        self.assertEqual(res.status_code, 422)
+
+    def test_threshold_out_of_range_rejected(self):
+        for bad in ("-0.1", "1.0001", "1e400"):
+            res = self.client.post(
+                "/predict",
+                content=(
+                    b'{"brand": "Yeezy", "retail_price": 220.0, "shoe_size": 10.0, '
+                    b'"days_since_release": 30, "threshold": ' + bad.encode() + b'}'
+                ),
+                headers={"Content-Type": "application/json"},
+            )
+            self.assertEqual(res.status_code, 422, f"threshold={bad} should be rejected")
+
+    def test_extrapolated_brand_flagged(self):
+        res = self.client.post(
+            "/predict",
+            json={"brand": "Nike", "retail_price": 150.0, "shoe_size": 10.0,
+                  "days_since_release": 30, "threshold": 0.15},
+        )
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertTrue(data["is_extrapolated"])
+        self.assertEqual(data["threshold"], 0.15)
+
+    def test_trained_brand_not_flagged(self):
+        res = self.client.post(
+            "/predict",
+            json={"brand": "Off-White", "retail_price": 190.0, "shoe_size": 10.0,
+                  "days_since_release": 30},
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertFalse(res.json()["is_extrapolated"])
+
+    def test_zero_days_is_valid(self):
+        res = self.client.post(
+            "/predict",
+            json={"brand": "Yeezy", "retail_price": 220.0, "shoe_size": 10.0, "days_since_release": 0},
+        )
+        self.assertEqual(res.status_code, 200)
+
     def test_concurrent_requests_stress(self):
         """Fire 40 concurrent prediction requests and verify zero thread contention crashes."""
         payload = {
@@ -155,7 +225,7 @@ class TestAdversarialQA(unittest.TestCase):
         }
 
         def make_request(i):
-            client = TestClient(app)
+            client = TestClient(api_main.app)
             return client.post("/predict", json=payload)
 
         num_workers = 40

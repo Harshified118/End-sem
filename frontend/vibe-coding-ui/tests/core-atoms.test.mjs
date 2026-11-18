@@ -3,27 +3,26 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const holoPath = path.resolve(__dirname, "../src/components/motion/HoloTiltCard.tsx");
-const squigglyPath = path.resolve(__dirname, "../src/components/motion/SquigglyFilter.tsx");
-const marqueePath = path.resolve(__dirname, "../src/components/motion/MarketMarquee.tsx");
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const read = (rel) => fs.readFileSync(path.join(root, rel), "utf8");
+const exists = (rel) => fs.existsSync(path.join(root, rel));
 
-assert(fs.existsSync(holoPath), "HoloTiltCard.tsx must exist");
-const holo = fs.readFileSync(holoPath, "utf8");
-assert(holo.includes("perspective"), "HoloTiltCard must define 3D perspective");
-assert(holo.includes("rotateX"), "HoloTiltCard must track rotateX");
-assert(holo.includes("rotateY"), "HoloTiltCard must track rotateY");
-assert(holo.includes("radial-gradient"), "HoloTiltCard must render specular glare");
-assert(holo.includes("translateZ(30px)"), "HoloTiltCard must elevate content along Z axis");
+assert(exists("src/components/motion/HoloTiltCard.tsx"), "HoloTiltCard must exist");
+const holo = read("src/components/motion/HoloTiltCard.tsx");
+assert(holo.includes("perspective"), "HoloTiltCard needs perspective");
+assert(holo.includes("rotateX") && holo.includes("rotateY"), "Pointer tilt on both axes");
+assert(/\*\s*-?6\b/.test(holo), "Tilt must be capped near 6 degrees");
+assert(!holo.includes("* 12"), "Old 12-degree tilt is too aggressive");
+assert(holo.includes("preserve-3d"), "Tilt card must preserve 3d");
+assert(holo.includes("radial-gradient"), "Specular glare required");
 
-assert(fs.existsSync(squigglyPath), "SquigglyFilter.tsx must exist");
-const squiggly = fs.readFileSync(squigglyPath, "utf8");
-assert(squiggly.includes("feTurbulence"), "SquigglyFilter must declare feTurbulence");
-assert(squiggly.includes("feDisplacementMap"), "SquigglyFilter must declare feDisplacementMap");
-assert(squiggly.includes('id="squiggly-0"'), "SquigglyFilter must provide filter id squiggly-0");
+for (const removed of [
+  "src/components/motion/MarketMarquee.tsx",
+  "src/components/motion/SquigglyFilter.tsx",
+  "src/components/motion/FrontShoeScrollRail.tsx",
+  "src/components/motion/PinnedParallaxHero.tsx",
+]) {
+  assert(!exists(removed), `${removed} must be deleted in the redesign`);
+}
 
-assert(fs.existsSync(marqueePath), "MarketMarquee.tsx must exist");
-const marquee = fs.readFileSync(marqueePath, "utf8");
-assert(marquee.includes("animate-marquee") || marquee.includes("translateX"), "MarketMarquee must animate horizontally");
-
-console.log("PASS: Task 2 Core Atoms verification passed");
+console.log("PASS: 3D depth atoms verification passed");

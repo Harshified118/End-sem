@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node tests/motion-provider.test.mjs && node tests/core-atoms.test.mjs && node tests/parallax-hero.test.mjs && node tests/front-rail.test.mjs && node tests/design-tokens.test.mjs"
+    "test": "node tests/motion-provider.test.mjs && node tests/core-atoms.test.mjs && node tests/parallax-hero.test.mjs && node tests/front-rail.test.mjs && node tests/design-tokens.test.mjs && node tests/offline-api.test.mjs && node tests/a11y-interactions.test.mjs && node tests/theme.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

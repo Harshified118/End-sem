@@ -1,69 +1,79 @@
-# DropOrCop Design System Specification (DESIGN.md)
+# DropOrCop — DESIGN.md
 
-## Brand Identity & Aesthetic POV
-- **Vibe:** Dark precision streetwear arbitrage tool. Minimal, confident, uncluttered, and effortlessly legible.
-- **Inspiration:** Top-tier minimal editorial interfaces (Awwwards, Apple, Linear, StockX Pro).
-- **Core Principle:** Remove noise until only essential decision-driving data remains. A user should instantly understand what a feature does and what action to take.
+**Direction: Precision Lab with Cinematic Depth.** A dark, evidence-first tool for a serious ML
+project. The verdict is the loudest element; the shoe is the stage. Cinematic polish comes from
+easing, material depth and parallax — never from scroll-jacking or competing colours.
 
----
+## Design tokens
 
-## 1. Typography Hierarchy
+The DOM attribute `data-theme` on `<html>` is the single source of truth: `dark` (default) or
+`day`. Every component uses the same semantic utilities; only the token values change.
 
-| Role | Font Family | Weight | Size / Leading | Usage |
-|---|---|---|---|---|
-| **Display / Hero** | Plus Jakarta Sans (`font-sans`) | 900 / Black | 3rem–5rem / 1.05 | Hero headlines, major landing banners |
-| **Section Heading** | Plus Jakarta Sans (`font-sans`) | 800 / ExtraBold | 1.5rem–1.875rem | "Resale Profit Calculator", "Arbitrage Appraisal" |
-| **Field / Card Label** | Plus Jakarta Sans (`font-sans`) | 700 / Bold | 0.75rem–0.875rem | Uppercase tracking-wider (`tracking-wider text-xs`) |
-| **Body & Subtitles** | Plus Jakarta Sans (`font-sans`) | 500 / Medium | 0.875rem / 1.5 | Explanatory copy, instructions |
-| **Data & Financials** | JetBrains Mono (`font-mono`) | 800 / ExtraBold | 1.5rem–3rem | Prices, margins, days, model stats ONLY |
+### Dark (default)
 
-### Strict Typography Rules
-- **No Monospace as Costume:** Never use `font-mono` for field labels, section titles, buttons, or pseudo-code comments. Monospace is reserved exclusively for numerical data (currency, metrics, percentages).
-- **No Code Punctuation in UI:** Absolute ban on developer/terminal artifacts like `// STOCKX VALUATION RESULT`, `// FACULTY EVALUATION DIRECTIVE`, and `; $120.91...`.
-- **No Parenthetical Instruction Tags:** Ban labels like `SNEAKER BRAND (DROPDOWN)` or `SHOE SIZE (US MEN'S)`. Use clean, human labels: `Sneaker Brand`, `Shoe Size`.
-
----
-
-## 2. Color Palette & Semantics
-
-| Token | Hex / Class | Purpose |
+| Token | Value | Role |
 |---|---|---|
-| **Canvas Background** | `#09090b` (`bg-[#09090b]`) | Deepest void background |
-| **Surface Card** | `#121215` (`bg-[#121215]`) | Main container cards |
-| **Input / Field** | `#09090b` (`bg-zinc-950`) | Inset inputs, selects, field controls |
-| **Subtle Border** | `border-zinc-800` | Refined 1px dividers and card contours |
-| **Brand Accent** | `#bef264` (Volt Lime) | Focal action buttons, active indicators |
-| **Verdict COP** | `#10b981` (`emerald-500`) | Buy/profit signals, positive returns |
-| **Verdict DROP** | `#f43f5e` (`rose-500`) | Loss/risk signals, depreciation |
-| **Text Primary** | `#ffffff` (`text-white`) | Headings, key figures |
-| **Text Secondary** | `#d4d4d8` (`text-zinc-300`) | High-legibility body copy |
-| **Text Muted** | `#a1a1aa` (`text-zinc-400`) | Secondary labels, units, metadata |
+| canvas | `#09090b` | Page ground, inset fields |
+| surface | `#121215` | Elevated cards, cockpit, verdict |
+| inset | `#09090b` | Inputs and dark wells |
+| hairline | zinc-800 `#27272a` | 1px borders |
+| accent | `#bef264` | Action, active, focus only |
+| accent-readable / on-accent | `#bef264` / `#09090b` | Accent text/focus / text on accent fill |
+| cop / cop-ink | `#10b981` / `#09090b` | Profitable verdict / text on COP fill |
+| drop / drop-ink | `#f43f5e` / `#ffffff` | Rejected verdict / text on DROP fill |
+| warn | `#f59e0b` | Offline / demo / extrapolated only |
+| ink-1 / ink-2 / ink-3 / ink-4 | `#f4f4f5` / `#d4d4d8` / `#a1a1aa` / `#71717a` | Primary / secondary / microcopy / decorative only |
+| radius | 12px card, 16px panel | One radius per surface class |
 
----
+### Day
 
-## 3. UI/UX Simplification & Decluttering Rules
+| Token | Value | Role |
+|---|---|---|
+| canvas / surface | `#ffffff` / `#ffffff` | Page ground / elevated cards |
+| inset / hairline | `#f4f4f5` / `#e4e4e7` | Inputs / 1px borders |
+| accent | `#bef264` | Filled actions stay the same lime |
+| accent-readable / on-accent | `#3f6212` / `#09090b` | Readable lime text/focus on white / text on fill |
+| cop / cop-ink | `#047857` / `#ffffff` | Accessible green verdict / text on fill |
+| drop / drop-ink | `#e11d48` / `#ffffff` | Accessible rose verdict / text on fill |
+| warn | `#b45309` | Accessible amber for offline / demo / extrapolated |
+| ink-1 / ink-2 / ink-3 / ink-4 | `#18181b` / `#3f3f46` / `#52525b` / `#a1a1aa` | Primary / secondary / microcopy / decorative only |
 
-### Form Layout (`ValuationCockpit`)
-1. **Header:**
-   - Badge: `VALUATION INPUT PARAMETERS` (subtle uppercase tracking-wider).
-   - Title: `Resale Profit Calculator`.
-   - Subtitle: `Configure sneaker attributes to predict secondary resale price and COP / DROP verdict.`
-2. **Quick Presets:** Keep a clean, compact strip of 6 curated sneakers at the top for 1-click loading.
-3. **Fields (Single Source of Truth):**
-   - **Sneaker Brand:** Clean `<select>` dropdown. **No redundant duplicate pill buttons underneath**.
-   - **Sneaker Model:** Clean `<select>` dropdown synchronized with the selected brand. **No redundant pill buttons underneath**.
-   - **Retail Price & Shoe Size:** 2-column clean inputs with clear iconography (`$`, size).
-   - **Holding Period (Days):** Combined range slider + numeric input with 5 clean presets (`0d`, `30d`, `90d`, `180d`, `365d`).
-4. **Primary CTA:** Full-width high-contrast Volt button: `Calculate Resale Valuation →`.
+Day uses darker shades of the same semantic hues — no hue substitutions, no filters. One colour
+per semantic role. No slate/zinc mixing, no alternate lime or green. `ink-4` is decorative only;
+readable text uses `ink-3` or brighter.
 
-### Appraisal Stage (`SneakerCard3D`)
-1. **No Pseudo-Code Comments:** Clean card header with sneaker model name, retail price, size, and holding days.
-2. **Hero Verdict Banner:**
-   - Single clean badge: `COP • Profitable Flip` (emerald) or `DROP • High Risk` (rose).
-   - Plain English verdict: `Expected resale is $120.91 above the original price.`
-3. **Resale Valuation Hero:**
-   - Prominent large dollar figure (`$340.91 USD`) in JetBrains Mono.
-4. **Financial Impact Grid:**
-   - Net Profit: `+$120.91`
-   - ROI Margin: `+55.0%`
-5. **Clean Metadata Strip:** Retail Price, US Size, and Holding Days in neat, uncluttered badges.
+**Type scale:** 12 / 14 / 16 / 18 / 22 / 28 / 40 px. Plus Jakarta Sans 600/700/800 for UI and
+headings; JetBrains Mono 500/700 only for digits (prices, ROI, days, model metrics). Minimum
+readable label 14px; microcopy 12px. Sentence case everywhere except the COP / DROP verdict word.
+
+**Contrast (Dark on canvas, WCAG AA):** ink-1 18.2:1 · ink-2 14.1:1 · ink-3 7.6:1 · accent 15.2:1 ·
+cop 7.8:1 · drop 5.4:1 · warn 9.2:1. `ink-4` 4.2:1 → never used for text. In Day, semantic text
+uses the darker `-readable` / `-ink` shades so the same roles stay AA on white.
+
+## Elevation
+
+Surface `#121215` over canvas `#09090b`; multi-layer shadow = 1px white inset hairline +
+2px/4px contact + 18px/40px ambient. Shadows are pre-baked, never animated. HoloTiltCard uses a
+1000px perspective, ±6° pointer tilt, `preserve-3d`, and a glare that follows the pointer.
+
+## Motion rules
+
+- Scroll-driven, never scroll-jacked: no pins, no marketing hold, no progress bar.
+- Hero shoe floats slowly, breathes its pre-baked shadow, drifts toward the pointer, auto-spins
+  across 36 real WebP frames; drag takes manual control.
+- Sections reveal eyebrow → heading → body at ~80ms; watchlist cards at 60ms.
+- Parallax and reveals animate **transform and opacity only**. No width, height, margin, colour
+  or box-shadow animation. Never block reading; nothing moves faster than 600ms.
+- Easing `cubic-bezier(0.22, 1, 0.36, 1)`. One authored rhythm across the whole page.
+
+## Reduced motion
+
+When `prefers-reduced-motion: reduce`: auto-spin, float, parallax, pointer drift and pointer tilt
+are off; every transition/animation collapses to `0.01ms` or nothing. Content is visible by
+default — motion never gates reading. The 360 rotator still works on explicit drag.
+
+## Copy rules
+
+One disclaimer, once: “Estimates from a model trained on Yeezy & Off-White StockX sales. Not
+financial advice.” Use “retail price”, “days since release”, “verdict”, “past checks”, “model
+info”. No MSRP, no holding period, no pseudo-code, no developer labels.

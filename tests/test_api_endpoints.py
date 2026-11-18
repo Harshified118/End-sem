@@ -4,15 +4,21 @@ Tests /, /health, /brands, /predict, /history, validation rules, status codes, a
 """
 
 import unittest
+import api.main as api_main
 from fastapi.testclient import TestClient
-from api.main import app
+from tests._support import use_temp_ledger
 
 
 class TestAPIEndpoints(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.client = TestClient(app)
+        cls._cleanup = use_temp_ledger()
+        cls.client = TestClient(api_main.app)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._cleanup()
 
     def test_root_endpoint(self):
         """Test GET / returns 200 and expected metadata."""
@@ -162,6 +168,24 @@ class TestAPIEndpoints(unittest.TestCase):
         }
         response = self.client.post("/predict", json=payload)
         self.assertEqual(response.status_code, 422)
+
+    def test_brands_includes_trained_set(self):
+        """The catalog must expose which brands the model has actually seen."""
+        response = self.client.get("/brands")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("trained_brands", data)
+        self.assertEqual(set(data["trained_brands"]), {"Yeezy", "Off-White"})
+
+    def test_history_endpoint_returns_total_and_rows(self):
+        """The ledger badge needs the real total, not the page size."""
+        response = self.client.get("/history?limit=5")
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertIn("total", data)
+        self.assertIn("predictions", data)
+        self.assertIsInstance(data["total"], int)
+        self.assertLessEqual(len(data["predictions"]), 5)
 
     def test_predict_negative_days(self):
         """Test POST /predict with negative days returns 422."""

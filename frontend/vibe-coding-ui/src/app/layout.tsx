@@ -1,11 +1,25 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
+import "lenis/dist/lenis.css";
 import "./globals.css";
 import { SmoothScrollProvider } from "@/components/motion/SmoothScrollProvider";
 
+const jakarta = localFont({
+  src: "../../public/fonts/jakarta-variable.woff2",
+  variable: "--font-jakarta",
+  display: "swap",
+});
+
+const jetbrains = localFont({
+  src: "../../public/fonts/jetbrains-variable.woff2",
+  variable: "--font-jetbrains",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "DropOrCop | Sneaker Resale Profit Arbitrage Predictor",
+  title: "DropOrCop | Sneaker resale verdicts",
   description:
-    "Machine learning resale valuation engine predicting StockX market prices and COP/DROP verdicts.",
+    "Predict a sneaker's resale price and get a clear COP or DROP verdict, backed by model evidence.",
 };
 
 export default function RootLayout({
@@ -14,8 +28,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark h-full antialiased">
-      <body className="min-h-full flex flex-col bg-[#09090b] text-zinc-100">
+    <html
+      lang="en"
+      data-theme="dark"
+      suppressHydrationWarning
+      className={`h-full antialiased ${jakarta.variable} ${jetbrains.variable}`}
+    >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var t;try{t=localStorage.getItem("droporcop-theme")}catch(e){}if(t!=="dark"&&t!=="day"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"day"}document.documentElement.dataset.theme=t})()`,
+          }}
+        />
+      </head>
+      <body className="flex min-h-full flex-col bg-canvas text-ink-1">
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
       </body>
     </html>
