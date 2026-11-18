@@ -26,7 +26,7 @@ export function PinnedParallaxHero({ onExploreClick }: PinnedParallaxHeroProps) 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: heroPinnedRef.current,
-          start: "top top",
+          start: "top 64px",
           end: "+=600",
           pin: true,
           pinSpacing: true,
@@ -49,7 +49,7 @@ export function PinnedParallaxHero({ onExploreClick }: PinnedParallaxHeroProps) 
         tl.fromTo(
           badgeLeftRef.current,
           { x: 0, opacity: 0.8 },
-          { x: -50, opacity: 1, ease: "none" },
+          { x: -60, opacity: 1, ease: "none" },
           0
         );
       }
@@ -58,7 +58,7 @@ export function PinnedParallaxHero({ onExploreClick }: PinnedParallaxHeroProps) 
         tl.fromTo(
           badgeRightRef.current,
           { x: 0, opacity: 0.8 },
-          { x: 50, opacity: 1, ease: "none" },
+          { x: 60, opacity: 1, ease: "none" },
           0
         );
       }

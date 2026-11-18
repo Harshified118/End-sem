@@ -16,7 +16,6 @@ import { ValuationCockpit } from "@/components/ValuationCockpit";
 import { SneakerCard3D } from "@/components/SneakerCard3D";
 import { HistoryLedger } from "@/components/HistoryLedger";
 import { ModelDiagnosticsCard } from "@/components/ModelDiagnosticsCard";
-import { SmoothScrollProvider } from "@/components/motion/SmoothScrollProvider";
 import { SquigglyFilter } from "@/components/motion/SquigglyFilter";
 import { MarketMarquee } from "@/components/motion/MarketMarquee";
 import { PinnedParallaxHero } from "@/components/motion/PinnedParallaxHero";

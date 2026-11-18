@@ -39,13 +39,13 @@ export function HoloTiltCard({
 
   return (
     <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       style={{ perspective: 1000 }}
       className={`relative rounded-2xl transition-transform duration-200 ease-out ${className}`}
     >
       <div
-        ref={cardRef}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
         style={{
           transform: `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
           transformStyle: "preserve-3d",

@@ -340,7 +340,7 @@ export function ValuationCockpit({
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3.5 px-6 rounded-xl bg-zinc-100 hover:bg-white text-zinc-950 font-sans font-semibold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group active:scale-[0.99]"
+          className="w-full py-3.5 px-6 rounded-xl bg-[#bef264] hover:bg-[#a3e635] text-zinc-950 font-black text-sm tracking-tight shadow-lg shadow-[#bef264]/15 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group active:scale-[0.99]"
         >
           {isLoading ? (
             <div className="flex items-center gap-2">

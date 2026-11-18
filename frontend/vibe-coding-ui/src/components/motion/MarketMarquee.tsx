@@ -31,7 +31,7 @@ export function MarketMarquee({ items = DEFAULT_MARQUEE_ITEMS }: { items?: Marqu
         </span>
       </div>
 
-      <div className="flex w-max animate-marquee hover:[animation-play-state:paused] pl-72">
+      <div className="flex w-max animate-marquee hover:[animation-play-state:paused]">
         {displayItems.map((item, idx) => (
           <div
             key={idx}
