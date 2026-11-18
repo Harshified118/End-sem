@@ -36,9 +36,10 @@ export function PinnedParallaxHero({ onExploreClick }: PinnedParallaxHeroProps) 
 
   // Generate frame path
   const getFrameUrl = useCallback((index: number) => {
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || "";
     const normalized = ((index % totalFrames) + totalFrames) % totalFrames;
     const padNum = String(normalized + 1).padStart(2, "0");
-    return `/shoes/360_webp/ow-chicago/frame_${padNum}.webp`;
+    return `${basePath}/shoes/360_webp/ow-chicago/frame_${padNum}.webp`;
   }, [totalFrames]);
 
   // Preload initial keyframes on mount

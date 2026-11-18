@@ -19,6 +19,8 @@ export interface ShowcaseSneaker {
   imageUrl: string;
 }
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
 const SHOWCASE_ITEMS: ShowcaseSneaker[] = [
   {
     id: "ow-chicago",
@@ -30,7 +32,7 @@ const SHOWCASE_ITEMS: ShowcaseSneaker[] = [
     spread: "+142.8%",
     tag: "GRAIL // THE TEN",
     avgResale: 4250,
-    imageUrl: "/shoes/ow-chicago_hero.webp",
+    imageUrl: `${BASE_PATH}/shoes/ow-chicago_hero.webp`,
   },
   {
     id: "yzy-zebra",
@@ -42,7 +44,7 @@ const SHOWCASE_ITEMS: ShowcaseSneaker[] = [
     spread: "+54.9%",
     tag: "HIGH LIQUIDITY",
     avgResale: 340,
-    imageUrl: "/shoes/yzy-zebra_hero.webp",
+    imageUrl: `${BASE_PATH}/shoes/yzy-zebra_hero.webp`,
   },
   {
     id: "ts-reverse-mocha",
@@ -54,7 +56,7 @@ const SHOWCASE_ITEMS: ShowcaseSneaker[] = [
     spread: "+188.4%",
     tag: "CACTUS JACK",
     avgResale: 1150,
-    imageUrl: "/shoes/ts-reverse-mocha_hero.webp",
+    imageUrl: `${BASE_PATH}/shoes/ts-reverse-mocha_hero.webp`,
   },
   {
     id: "dunk-panda",
@@ -66,7 +68,7 @@ const SHOWCASE_ITEMS: ShowcaseSneaker[] = [
     spread: "+22.1%",
     tag: "HIGH VOLUME",
     avgResale: 140,
-    imageUrl: "/shoes/dunk-panda_hero.webp",
+    imageUrl: `${BASE_PATH}/shoes/dunk-panda_hero.webp`,
   },
   {
     id: "nb-990",
@@ -78,7 +80,7 @@ const SHOWCASE_ITEMS: ShowcaseSneaker[] = [
     spread: "+16.2%",
     tag: "HERITAGE RUN",
     avgResale: 215,
-    imageUrl: "/shoes/nb-990_hero.webp",
+    imageUrl: `${BASE_PATH}/shoes/nb-990_hero.webp`,
   },
   {
     id: "ow-presto",
@@ -90,7 +92,7 @@ const SHOWCASE_ITEMS: ShowcaseSneaker[] = [
     spread: "+96.3%",
     tag: "GRAIL // VIRGIL",
     avgResale: 880,
-    imageUrl: "/shoes/ow-presto_hero.webp",
+    imageUrl: `${BASE_PATH}/shoes/ow-presto_hero.webp`,
   },
 ];
 
