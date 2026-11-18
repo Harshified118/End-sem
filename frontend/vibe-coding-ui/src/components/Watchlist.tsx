@@ -21,20 +21,19 @@ export function Watchlist({ onSelectSneaker }: WatchlistProps) {
   const items = REFERENCE_SNEAKERS.slice(0, 6);
 
   return (
-    <section aria-labelledby="watchlist-heading" className="w-full">
+    <section id="wishlist-section" aria-labelledby="watchlist-heading" className="w-full scroll-mt-20">
       <Reveal stagger={0.06}>
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
             <p data-reveal-item className="text-12 font-semibold uppercase tracking-[0.16em] text-accent-readable">
-              Watchlist
+              Wishlist
             </p>
             <h2 data-reveal-item id="watchlist-heading" className="mt-1 text-22 font-extrabold tracking-tight text-ink-1 sm:text-28">
-              Six pairs worth a second look
+              Popular Sneaker Wishlist
             </h2>
           </div>
           <p data-reveal-item className="text-12 text-ink-3">
-            Pick a pair to load the calculator and run a prediction. Sample spreads are illustrative,
-            not model predictions.
+            Curated high-liquidity pairs. Pick any pair to instantly calculate its resale profit or loss.
           </p>
         </div>
 
@@ -48,14 +47,15 @@ export function Watchlist({ onSelectSneaker }: WatchlistProps) {
                   aria-label={`Check profit for ${sneaker.name}`}
                   className="group flex w-full flex-col text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-readable"
                 >
-                  <div className="relative mb-3 flex h-36 items-center justify-center overflow-hidden rounded-card bg-inset">
+                  <div className="relative mb-3 flex h-44 items-center justify-center overflow-hidden rounded-card bg-inset">
                     <Image
                       src={`${BASE}/shoes/${sneaker.id}_hero.webp`}
                       alt={sneaker.name}
-                      width={360}
-                      height={180}
+                      width={800}
+                      height={500}
                       loading="lazy"
-                      className="h-full w-full object-contain"
+                      sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 360px"
+                      className="h-full w-full object-contain p-3 drop-shadow-[0_12px_20px_rgba(0,0,0,0.45)]"
                     />
                     <span className="absolute right-2 top-2 rounded-card border border-hairline bg-canvas/80 px-2 py-1 font-mono text-12 font-bold tabular text-accent-readable">
                       {formatSpread(sneaker)}

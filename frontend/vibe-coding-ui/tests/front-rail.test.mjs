@@ -14,5 +14,7 @@ assert(watchlist.includes("stagger={0.06}"), "Cards stagger by 60ms");
 assert(watchlist.includes("onSelectSneaker"), "Card click loads the calculator");
 assert(!watchlist.includes("ShoeRotator360"), "Watchlist cards stay calm: no per-card rotator");
 assert(watchlist.includes("retail"), "Card shows retail price");
+assert(watchlist.includes('id="wishlist-section"'), "Section must have id='wishlist-section'");
+assert(watchlist.includes("Popular Sneaker Wishlist"), "Section heading must be 'Popular Sneaker Wishlist'");
 
 console.log("PASS: watchlist verification passed");
