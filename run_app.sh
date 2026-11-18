@@ -31,14 +31,16 @@ cd "$PROJECT_ROOT"
 "$PROJECT_ROOT/venv/bin/uvicorn" api.main:app --host 127.0.0.1 --port 8000 --reload &
 BACKEND_PID=$!
 
-# Wait briefly for backend startup
-sleep 1.5
+# Wait briefly for backend startup (loading ML model)
+sleep 2.5
 
 # 2. Start Next.js frontend (port 3000)
 echo "💻 [2/2] Starting Next.js UI on http://localhost:3000..."
 cd "$FRONTEND_DIR"
 npm run dev -- -p 3000 &
 FRONTEND_PID=$!
+
+sleep 1.5
 
 echo ""
 echo "✨ DropOrCop is live and running!"
@@ -48,4 +50,4 @@ echo "   👉 Health Status:  http://localhost:8000/health"
 echo ""
 echo "Press Ctrl+C to stop both servers."
 
-wait
+wait "$BACKEND_PID" "$FRONTEND_PID"
