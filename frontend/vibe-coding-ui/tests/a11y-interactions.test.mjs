@@ -24,6 +24,9 @@ assert(
 const listbox = header.match(/role="listbox"[\s\S]*?<\/ul>/)?.[0] ?? "";
 assert(!listbox.includes("<button"), "Suggestion options must not nest focusable buttons inside the listbox");
 
+assert(header.includes("Wishlist") || header.includes("wishlist"), "Header must feature a Wishlist button");
+assert(!header.includes("Model online"), "Model online pill must be removed from Header");
+
 const shoe = read("src/components/Shoe360.tsx");
 assert(shoe.includes("reducedMotion ? null :"), "Auto-spin control must be hidden under reduced motion");
 assert(

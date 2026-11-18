@@ -45,7 +45,7 @@ assert(source.split(disclaimer).length - 1 === 1, "Disclaimer must appear exactl
 
 for (const required of [
   "0.6271", "89.38", "19,938", "days since release", "past checks", "model info", "verdict",
-  "Buy if profit ≥", "Extrapolated", "Demo mode",
+  "Buy if profit ≥", "Extrapolated", "Wishlist",
 ]) {
   assert(source.includes(required), `Missing required copy/data: ${required}`);
 }

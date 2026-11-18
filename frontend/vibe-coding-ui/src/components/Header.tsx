@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { Search, X } from "lucide-react";
+import { Bookmark, Search, X } from "lucide-react";
 import type { HealthResponse } from "@/lib/api";
 import { REFERENCE_SNEAKERS, type CatalogSneaker } from "@/lib/sneakers";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { scrollToSection } from "@/lib/scroll";
 
 export interface HeaderProps {
   health?: HealthResponse | null;
@@ -162,17 +163,16 @@ export function Header({ health, onRefreshHealth, onSelectSneaker }: HeaderProps
 
         <button
           type="button"
-          onClick={onRefreshHealth}
-          title="Re-check model status"
-          aria-label={modelOnline ? "Model online — re-check" : "Demo mode — re-check"}
-          className={`flex h-8 shrink-0 items-center gap-1.5 rounded-card border px-2.5 text-12 font-semibold transition-colors sm:px-3 ${
-            modelOnline
-              ? "border-cop/40 bg-cop/10 text-cop"
-              : "border-warn/40 bg-warn/10 text-warn"
-          }`}
+          onClick={() => scrollToSection("wishlist-section")}
+          title="View Wishlist"
+          aria-label="View Wishlist"
+          className="flex h-8 shrink-0 items-center gap-1.5 rounded-card border border-hairline bg-surface px-2.5 text-12 font-semibold text-ink-1 transition-all hover:border-accent hover:text-accent-readable sm:px-3"
         >
-          <span className={`size-1.5 rounded-full ${modelOnline ? "bg-cop" : "bg-warn"}`} />
-          <span className="hidden sm:inline">{modelOnline ? "Model online" : "Demo mode"}</span>
+          <Bookmark className="size-3.5 text-accent-readable" aria-hidden="true" />
+          <span className="hidden sm:inline">Wishlist</span>
+          <span className="ml-0.5 rounded-full bg-accent/15 px-1.5 py-0.2 font-mono text-11 font-bold text-accent-readable">
+            {REFERENCE_SNEAKERS.length}
+          </span>
         </button>
       </div>
     </header>
