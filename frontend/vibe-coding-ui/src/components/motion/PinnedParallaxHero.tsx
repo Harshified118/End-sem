@@ -108,30 +108,41 @@ export function PinnedParallaxHero({ onExploreClick }: PinnedParallaxHeroProps) 
             <div className="text-[11px] text-[#bef264] font-semibold">R² = 0.6525 • MAE $88.69</div>
           </div>
 
-          {/* Central 3D Sneaker Visual Stage */}
+          {/* Central 3D Floating Sneaker Visual Stage */}
           <div
             ref={shoeVisualRef}
-            className="w-full max-w-lg aspect-[16/10] relative rounded-3xl border-2 border-zinc-800 bg-zinc-950 p-3 flex flex-col items-center justify-center shadow-2xl backdrop-blur-md overflow-hidden group"
+            className="w-full max-w-lg relative flex flex-col items-center justify-center p-4 group select-none"
           >
-            {/* Real Sneaker Product Photo */}
-            <div className="w-full h-full rounded-2xl overflow-hidden relative">
-              <img
-                src="/shoes/jordan-chicago.jpg"
-                alt="Air Jordan 1 Retro High Chicago"
-                className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent pointer-events-none" />
+            {/* Dynamic Radial Floor Spotlight Glow */}
+            <div className="absolute inset-x-8 bottom-4 h-24 bg-radial from-[#bef264]/20 via-zinc-850/10 to-transparent blur-2xl pointer-events-none group-hover:from-[#bef264]/35 transition-all duration-700" />
 
-              {/* Specular Status HUD Overlay */}
-              <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs font-mono font-bold text-zinc-300">
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-700">
-                  <span className="w-2 h-2 rounded-full bg-[#bef264] animate-ping" />
-                  <span>SPECIMEN // AIR JORDAN 1 CHICAGO</span>
-                </span>
-                <span className="px-2.5 py-1 rounded-lg bg-[#bef264] text-zinc-950 font-black">
-                  SPREAD: +142.8%
-                </span>
-              </div>
+            {/* Dynamic Soft Floor Contact Shadow */}
+            <div
+              style={{
+                background:
+                  "radial-gradient(ellipse at center, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 45%, transparent 75%)",
+              }}
+              className="absolute bottom-6 w-3/4 h-8 rounded-full blur-md group-hover:scale-110 group-hover:opacity-75 transition-all duration-500 pointer-events-none"
+            />
+
+            {/* Floating Popped-Out Sneaker */}
+            <div className="relative z-10 transition-all duration-500 ease-out group-hover:scale-112 group-hover:-translate-y-4">
+              <img
+                src="/shoes/ow-chicago_hero.webp"
+                alt="Off-White x Air Jordan 1 Chicago"
+                className="w-full max-h-72 object-contain filter drop-shadow-[0_25px_35px_rgba(0,0,0,0.85)] group-hover:drop-shadow-[0_35px_45px_rgba(0,0,0,0.95)] transition-all duration-500"
+              />
+            </div>
+
+            {/* Specular Status HUD Overlay */}
+            <div className="mt-4 flex items-center justify-between w-full max-w-md text-xs font-mono font-bold text-zinc-300">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-950/80 border border-zinc-800 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-[#bef264] animate-ping" />
+                <span>OFF-WHITE x AJ1 CHICAGO // THE TEN</span>
+              </span>
+              <span className="px-3 py-1.5 rounded-xl bg-[#bef264] text-zinc-950 font-black shadow-md shadow-[#bef264]/20">
+                SPREAD: +142.8%
+              </span>
             </div>
           </div>
 

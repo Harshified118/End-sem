@@ -3,6 +3,7 @@
 import React, { useRef } from "react";
 import { ChevronLeft, ChevronRight, ArrowUpRight, Zap, Sparkles } from "lucide-react";
 import { HoloTiltCard } from "./HoloTiltCard";
+import { ShoeRotator360 } from "./ShoeRotator360";
 import { PredictPayload } from "@/lib/api";
 
 export interface ShowcaseSneaker {
@@ -29,10 +30,10 @@ const SHOWCASE_ITEMS: ShowcaseSneaker[] = [
     spread: "+142.8%",
     tag: "GRAIL // THE TEN",
     avgResale: 4250,
-    imageUrl: "/shoes/jordan-chicago.jpg",
+    imageUrl: "/shoes/ow-chicago_hero.webp",
   },
   {
-    id: "yzy-350-zebra",
+    id: "yzy-zebra",
     name: "Yeezy Boost 350 V2 Zebra",
     brand: "Yeezy",
     retail: 220,
@@ -41,7 +42,7 @@ const SHOWCASE_ITEMS: ShowcaseSneaker[] = [
     spread: "+54.9%",
     tag: "HIGH LIQUIDITY",
     avgResale: 340,
-    imageUrl: "/shoes/yeezy-zebra.jpg",
+    imageUrl: "/shoes/yzy-zebra_hero.webp",
   },
   {
     id: "ts-reverse-mocha",
@@ -53,7 +54,7 @@ const SHOWCASE_ITEMS: ShowcaseSneaker[] = [
     spread: "+188.4%",
     tag: "CACTUS JACK",
     avgResale: 1150,
-    imageUrl: "/shoes/travis-scott.jpg",
+    imageUrl: "/shoes/ts-reverse-mocha_hero.webp",
   },
   {
     id: "dunk-panda",
@@ -65,10 +66,10 @@ const SHOWCASE_ITEMS: ShowcaseSneaker[] = [
     spread: "+22.1%",
     tag: "HIGH VOLUME",
     avgResale: 140,
-    imageUrl: "/shoes/dunk-panda.jpg",
+    imageUrl: "/shoes/dunk-panda_hero.webp",
   },
   {
-    id: "nb-990v5",
+    id: "nb-990",
     name: "New Balance 990v5 Grey",
     brand: "New Balance",
     retail: 185,
@@ -77,7 +78,7 @@ const SHOWCASE_ITEMS: ShowcaseSneaker[] = [
     spread: "+16.2%",
     tag: "HERITAGE RUN",
     avgResale: 215,
-    imageUrl: "/shoes/nb-990.jpg",
+    imageUrl: "/shoes/nb-990_hero.webp",
   },
   {
     id: "ow-presto",
@@ -89,7 +90,7 @@ const SHOWCASE_ITEMS: ShowcaseSneaker[] = [
     spread: "+96.3%",
     tag: "GRAIL // VIRGIL",
     avgResale: 880,
-    imageUrl: "/shoes/offwhite-presto.jpg",
+    imageUrl: "/shoes/ow-presto_hero.webp",
   },
 ];
 
@@ -160,9 +161,9 @@ export function FrontShoeScrollRail({ onSelectSneaker }: FrontShoeScrollRailProp
             className="snap-start shrink-0 w-[310px] sm:w-[360px]"
           >
             <HoloTiltCard className="h-full">
-              <div className="flex flex-col justify-between h-[450px] p-2">
+              <div className="flex flex-col justify-between h-[490px] p-2.5">
                 {/* Top Badge Info */}
-                <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
+                <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800/80">
                   <span className="text-xs font-mono px-3 py-1 rounded-full bg-white/[0.08] border border-white/10 text-zinc-200 font-bold uppercase tracking-wider">
                     {item.tag}
                   </span>
@@ -172,32 +173,34 @@ export function FrontShoeScrollRail({ onSelectSneaker }: FrontShoeScrollRailProp
                   </span>
                 </div>
 
-                {/* REAL SNEAKER PHOTOGRAPHY STAGE */}
-                <div className="my-auto py-3 flex flex-col items-center justify-center relative group">
-                  <div className="w-full h-44 rounded-2xl overflow-hidden relative border border-zinc-800/80 bg-zinc-950/60 shadow-lg group-hover:border-[#bef264]/40 transition-all duration-300">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.name}
-                      className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/90 via-transparent to-transparent pointer-events-none" />
-                    <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-xs font-mono text-zinc-300 font-bold">
-                      <span className="px-2 py-0.5 rounded bg-zinc-900/80 border border-zinc-700/80">
-                        {item.brand}
-                      </span>
-                      <span className="text-[#bef264]">SIZE {item.size} US</span>
-                    </div>
-                  </div>
+                {/* 360 ROTATABLE & POP-OUT SNEAKER STAGE */}
+                <div className="my-auto py-1">
+                  <ShoeRotator360
+                    shoeId={item.id}
+                    name={item.name}
+                    brand={item.brand}
+                    retail={item.retail}
+                    avgResale={item.avgResale}
+                    spread={item.spread}
+                    onValuate={() =>
+                      onSelectSneaker({
+                        brand: item.brand,
+                        sneaker_name: item.name,
+                        retail_price: item.retail,
+                        shoe_size: item.size,
+                        days_since_release: item.days,
+                      })
+                    }
+                  />
                 </div>
 
                 {/* Footer Info & Action */}
-                <div className="space-y-3 pt-3 border-t border-zinc-800/80">
+                <div className="space-y-3 pt-2.5 border-t border-zinc-800/80">
                   <div>
                     <h3 className="text-base sm:text-lg font-black text-white tracking-tight truncate">
                       {item.name}
                     </h3>
-                    <div className="flex items-center justify-between text-sm font-mono text-zinc-300 mt-1 font-semibold">
+                    <div className="flex items-center justify-between text-sm font-mono text-zinc-300 mt-0.5 font-semibold">
                       <span>Retail MSRP: <strong className="text-zinc-100">${item.retail}</strong></span>
                       <span className="text-[#bef264] font-black text-base">Est: ${item.avgResale}</span>
                     </div>
@@ -213,7 +216,7 @@ export function FrontShoeScrollRail({ onSelectSneaker }: FrontShoeScrollRailProp
                         days_since_release: item.days,
                       })
                     }
-                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-zinc-900 hover:bg-[#bef264] text-zinc-200 hover:text-zinc-950 border-2 border-zinc-700 hover:border-[#bef264] text-sm font-mono font-black tracking-wider transition-all duration-150 cursor-pointer active:scale-98 shadow-md"
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-zinc-900 hover:bg-[#bef264] text-zinc-200 hover:text-zinc-950 border-2 border-zinc-700 hover:border-[#bef264] text-xs sm:text-sm font-mono font-black tracking-wider transition-all duration-150 cursor-pointer active:scale-98 shadow-md"
                   >
                     <Zap className="w-4 h-4" />
                     <span>VALUATE THIS SHOE (AUTO-FILL)</span>
