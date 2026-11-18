@@ -1,97 +1,193 @@
 {
   "author": "Anamika Ghosh (Model Checking & Evaluation Lead)",
   "phase": "Phase 4 - Model Evaluation & Diagnostics",
-  "sample_count": 18871,
+  "sample_count": 19938,
   "overall_metrics": {
-    "r2_score": 0.6525,
-    "mae": 88.69,
-    "rmse": 143.71,
-    "mape_pct": 20.23,
-    "directional_accuracy_pct": 99.02,
-    "residual_mean": -1.22,
-    "residual_std": 143.71
+    "r2_score": 0.6271,
+    "mae": 89.38,
+    "rmse": 150.9,
+    "mape_pct": 21.22,
+    "directional_accuracy_pct": 98.37,
+    "residual_mean": 1.18,
+    "residual_std": 150.9
   },
   "brand_metrics": {
-    "Yeezy": {
-      "count": 13917,
-      "r2": 0.3239,
-      "mae": 78.11,
-      "rmse": 114.39,
-      "mape_pct": 21.25,
-      "verdict_acc_pct": 98.68
-    },
     "Off-White": {
-      "count": 4954,
-      "r2": 0.6172,
-      "mae": 118.43,
-      "rmse": 204.74,
-      "mape_pct": 17.35,
+      "count": 4872,
+      "r2": 0.6831,
+      "mae": 98.8,
+      "rmse": 192.36,
+      "mape_pct": 13.83,
+      "verdict_acc_pct": 100.0
+    },
+    "Yeezy": {
+      "count": 14039,
+      "r2": 0.1151,
+      "mae": 84.91,
+      "rmse": 133.21,
+      "mape_pct": 22.66,
+      "verdict_acc_pct": 98.66
+    },
+    "Jordan": {
+      "count": 796,
+      "r2": 0.0327,
+      "mae": 126.07,
+      "rmse": 172.51,
+      "mape_pct": 41.66,
+      "verdict_acc_pct": 87.56
+    },
+    "Nike": {
+      "count": 169,
+      "r2": 0.4644,
+      "mae": 38.16,
+      "rmse": 66.59,
+      "mape_pct": 19.81,
+      "verdict_acc_pct": 81.07
+    },
+    "Converse": {
+      "count": 7,
+      "r2": 0.0516,
+      "mae": 17.48,
+      "rmse": 20.36,
+      "mape_pct": 11.14,
+      "verdict_acc_pct": 85.71
+    },
+    "Crocs": {
+      "count": 4,
+      "r2": 0.7948,
+      "mae": 20.17,
+      "rmse": 23.07,
+      "mape_pct": 18.27,
+      "verdict_acc_pct": 100.0
+    },
+    "New Balance": {
+      "count": 28,
+      "r2": 0.5969,
+      "mae": 32.54,
+      "rmse": 45.55,
+      "mape_pct": 16.85,
+      "verdict_acc_pct": 92.86
+    },
+    "Puma": {
+      "count": 2,
+      "r2": -0.3479,
+      "mae": 13.01,
+      "rmse": 13.35,
+      "mape_pct": 9.57,
+      "verdict_acc_pct": 100.0
+    },
+    "Vans": {
+      "count": 1,
+      "r2": NaN,
+      "mae": 38.73,
+      "rmse": 38.73,
+      "mape_pct": 18.44,
+      "verdict_acc_pct": 100.0
+    },
+    "UGG": {
+      "count": 5,
+      "r2": -0.7842,
+      "mae": 29.95,
+      "rmse": 36.85,
+      "mape_pct": 25.63,
+      "verdict_acc_pct": 80.0
+    },
+    "adidas": {
+      "count": 12,
+      "r2": 0.2536,
+      "mae": 24.33,
+      "rmse": 31.64,
+      "mape_pct": 18.91,
+      "verdict_acc_pct": 91.67
+    },
+    "MSCHF": {
+      "count": 1,
+      "r2": NaN,
+      "mae": 304.71,
+      "rmse": 304.71,
+      "mape_pct": 201.79,
+      "verdict_acc_pct": 100.0
+    },
+    "The North Face": {
+      "count": 1,
+      "r2": NaN,
+      "mae": 2.0,
+      "rmse": 2.0,
+      "mape_pct": 1.72,
+      "verdict_acc_pct": 100.0
+    },
+    "Birkenstock": {
+      "count": 1,
+      "r2": NaN,
+      "mae": 5.09,
+      "rmse": 5.09,
+      "mape_pct": 2.69,
       "verdict_acc_pct": 100.0
     }
   },
   "outliers": {
     "top_underpredicted": [
       {
-        "actual_resale_price": 2875.0,
-        "predicted_resale_price": 1281.01,
+        "actual_resale_price": 2500.0,
+        "predicted_resale_price": 1123.0,
         "retail_price": 190.0,
-        "residual": 1593.99
+        "residual": 1377.0
       },
       {
-        "actual_resale_price": 2550.0,
-        "predicted_resale_price": 1029.53,
+        "actual_resale_price": 2000.0,
+        "predicted_resale_price": 658.4,
         "retail_price": 190.0,
-        "residual": 1520.47
+        "residual": 1341.6
       },
       {
-        "actual_resale_price": 2599.0,
-        "predicted_resale_price": 1164.02,
+        "actual_resale_price": 2098.0,
+        "predicted_resale_price": 780.0,
         "retail_price": 190.0,
-        "residual": 1434.98
+        "residual": 1318.0
       },
       {
-        "actual_resale_price": 2650.0,
-        "predicted_resale_price": 1262.68,
+        "actual_resale_price": 2110.0,
+        "predicted_resale_price": 900.0,
         "retail_price": 190.0,
-        "residual": 1387.32
+        "residual": 1210.0
       },
       {
-        "actual_resale_price": 3500.0,
-        "predicted_resale_price": 2142.34,
+        "actual_resale_price": 1980.0,
+        "predicted_resale_price": 777.73,
         "retail_price": 190.0,
-        "residual": 1357.6599999999999
+        "residual": 1202.27
       }
     ],
     "top_overpredicted": [
       {
-        "actual_resale_price": 826.0,
-        "predicted_resale_price": 2310.11,
+        "actual_resale_price": 1098.0,
+        "predicted_resale_price": 2450.0,
         "retail_price": 190.0,
-        "residual": -1484.1100000000001
+        "residual": -1352.0
       },
       {
-        "actual_resale_price": 935.0,
-        "predicted_resale_price": 2081.56,
+        "actual_resale_price": 900.0,
+        "predicted_resale_price": 2232.0,
         "retail_price": 190.0,
-        "residual": -1146.56
+        "residual": -1332.0
       },
       {
-        "actual_resale_price": 890.0,
-        "predicted_resale_price": 2036.36,
+        "actual_resale_price": 979.0,
+        "predicted_resale_price": 2299.41,
         "retail_price": 190.0,
-        "residual": -1146.36
+        "residual": -1320.4099999999999
       },
       {
-        "actual_resale_price": 850.0,
-        "predicted_resale_price": 1857.25,
+        "actual_resale_price": 866.0,
+        "predicted_resale_price": 2180.0,
         "retail_price": 190.0,
-        "residual": -1007.25
+        "residual": -1314.0
       },
       {
-        "actual_resale_price": 913.0,
-        "predicted_resale_price": 1915.83,
+        "actual_resale_price": 765.0,
+        "predicted_resale_price": 2050.0,
         "retail_price": 190.0,
-        "residual": -1002.8299999999999
+        "residual": -1285.0
       }
     ]
   }

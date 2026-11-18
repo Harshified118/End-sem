@@ -118,14 +118,14 @@ export function FrontShoeScrollRail({ onSelectSneaker }: FrontShoeScrollRailProp
           <div className="flex items-center gap-2.5">
             <span className="w-2.5 h-2.5 rounded-full bg-[#bef264] animate-ping" />
             <span className="text-xs sm:text-sm font-mono uppercase tracking-widest text-[#bef264] font-black">
-              FEATURED SNEAKERS • SCROLLABLE FRONT SHOWCASE
+              FEATURED SNEAKERS • 360° SHOWCASE
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white font-sans mt-1">
-            Secondary Market Arbitrage Watchlist
+            Popular Sneaker Watchlist
           </h2>
-          <p className="text-sm sm:text-base text-zinc-300 mt-1">
-            Swipe or use arrows to browse authentic market specimens. Click any shoe to load its attributes into the valuation engine.
+          <p className="text-sm sm:text-base text-zinc-400 mt-1">
+            Browse authentic sneakers with 360° rotation. Click any shoe to calculate its resale profit.
           </p>
         </div>
 

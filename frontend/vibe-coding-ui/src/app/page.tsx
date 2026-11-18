@@ -206,12 +206,13 @@ export default function Home() {
           {/* Right Column: 3D Holographic Tilt Valuation Result Stage (5 cols) */}
           <div className="lg:col-span-5 sticky top-24 space-y-3">
             <div className="flex items-center justify-between px-1">
-              <span className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider flex items-center gap-1.5 font-bold">
+              <span className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-400 flex items-center gap-2">
                 <Layers className="w-3.5 h-3.5 text-[#bef264]" />
-                3D Holographic Valuation Stage
+                <span>Arbitrage Appraisal & Verdict</span>
               </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[#bef264] font-bold">
-                HOVER TO TILT 3D
+              <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Live Valuation Stage</span>
               </span>
             </div>
             <SneakerCard3D result={activeValuation} isLoading={isPredicting} />

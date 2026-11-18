@@ -14,8 +14,14 @@ This script performs comprehensive evaluation on the holdout test set (18,871 re
 """
 
 import os
+import sys
 import json
 from pathlib import Path
+
+# Add project root to path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 import numpy as np
 import pandas as pd
 
@@ -46,8 +52,8 @@ def evaluate_model():
     df_preds = pd.read_csv(test_pred_path)
     print(f"\n📂 Loaded test predictions: {len(df_preds):,} records.")
 
-    # Reconstruct test set metadata (brand, days_since_release) for stratified evaluation
-    if clean_data_path.exists():
+    # Reconstruct test set metadata (brand, days_since_release) for stratified evaluation if missing
+    if "brand" not in df_preds.columns and clean_data_path.exists():
         df_full = pd.read_csv(clean_data_path)
         features = ["brand", "retail_price", "shoe_size", "days_since_release"]
         X = df_full[features]

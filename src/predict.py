@@ -5,21 +5,51 @@ Author: Harsh Kumar (Sl. No. 31) - ML Lead
 
 import argparse
 import json
+import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 import joblib
 import pandas as pd
+
+# Add project root to path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 MODEL_PATH = Path("models/best_model.joblib")
 
 
+CANONICAL_BRAND_MAP = {
+    "yeezy": "Yeezy",
+    "off-white": "Off-White",
+    "jordan": "Jordan",
+    "nike": "Nike",
+    "adidas": "adidas",
+    "new balance": "New Balance",
+    "converse": "Converse",
+    "asics": "ASICS",
+    "bape": "BAPE",
+    "puma": "Puma",
+    "reebok": "Reebok",
+    "salomon": "Salomon",
+    "crocs": "Crocs",
+    "timberland": "Timberland",
+    "ugg": "UGG",
+}
+
+
 def load_model(model_path: Path = MODEL_PATH):
-    """Load serialized scikit-learn pipeline."""
+    """Load serialized scikit-learn pipeline and set n_jobs=1 for low-latency inference."""
     if not model_path.exists():
         raise FileNotFoundError(
             f"Model artifact not found at {model_path}. Run 'python src/train.py' first."
         )
-    return joblib.load(model_path)
+    loaded = joblib.load(model_path)
+    if hasattr(loaded, "named_steps") and "regressor" in loaded.named_steps:
+        regressor = loaded.named_steps["regressor"]
+        if hasattr(regressor, "n_jobs"):
+            regressor.n_jobs = 1
+    return loaded
 
 
 def predict_resale(
@@ -27,7 +57,8 @@ def predict_resale(
     retail_price: float,
     shoe_size: float,
     days_since_release: int,
-    margin_threshold: float = 0.15,
+    sneaker_name: Optional[str] = None,
+    margin_threshold: Optional[float] = 0.15,
     model=None,
 ) -> Dict[str, Any]:
     """
@@ -37,16 +68,20 @@ def predict_resale(
     if model is None:
         model = load_model()
 
-    input_df = pd.DataFrame(
-        [
-            {
-                "brand": brand,
-                "retail_price": float(retail_price),
-                "shoe_size": float(shoe_size),
-                "days_since_release": int(days_since_release),
-            }
-        ]
-    )
+    # Normalize brand casing if known
+    cleaned_brand = str(brand).strip().lower()
+    canonical_brand = CANONICAL_BRAND_MAP.get(cleaned_brand, str(brand).strip())
+
+    row_dict = {
+        "brand": canonical_brand,
+        "retail_price": float(retail_price),
+        "shoe_size": float(shoe_size),
+        "days_since_release": int(days_since_release),
+    }
+    if sneaker_name:
+        row_dict["sneaker_name"] = str(sneaker_name)
+
+    input_df = pd.DataFrame([row_dict])
 
     pred_resale = float(model.predict(input_df)[0])
     pred_resale = round(pred_resale, 2)
@@ -54,11 +89,15 @@ def predict_resale(
     estimated_profit = round(pred_resale - retail, 2)
     profit_margin_pct = round((estimated_profit / retail) * 100, 2) if retail > 0 else 0.0
 
-    # Verdict determination based on margin threshold (default 15%)
-    verdict = "COP" if (estimated_profit / retail) >= margin_threshold else "DROP"
+    # Safe threshold evaluation
+    threshold = margin_threshold if margin_threshold is not None else 0.15
+    if retail > 0:
+        verdict = "COP" if (estimated_profit / retail) >= threshold else "DROP"
+    else:
+        verdict = "DROP"
 
     return {
-        "brand": brand,
+        "brand": canonical_brand,
         "retail_price": retail,
         "shoe_size": float(shoe_size),
         "days_since_release": int(days_since_release),
@@ -75,6 +114,7 @@ if __name__ == "__main__":
     parser.add_argument("--retail", type=float, default=220.0, help="Original retail price ($)")
     parser.add_argument("--size", type=float, default=10.5, help="Shoe size (US)")
     parser.add_argument("--days", type=int, default=45, help="Elapsed days since release")
+    parser.add_argument("--name", "--sneaker-name", type=str, default=None, help="Sneaker model or edition name (optional)")
     parser.add_argument("--threshold", type=float, default=0.15, help="Profit margin threshold (e.g. 0.15 for 15 percent)")
 
     args = parser.parse_args()
@@ -84,6 +124,7 @@ if __name__ == "__main__":
         retail_price=args.retail,
         shoe_size=args.size,
         days_since_release=args.days,
+        sneaker_name=args.name,
         margin_threshold=args.threshold,
     )
 

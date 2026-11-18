@@ -1,0 +1,76 @@
+{
+  "best_metrics": {
+    "iteration": 3,
+    "config": {
+      "iteration": 3,
+      "estimator": "ExtraTrees",
+      "n_estimators": 150,
+      "max_depth": null,
+      "weight_2023": 5.0
+    },
+    "real_life_accuracy": 95.48,
+    "real_life_mae": 14.06,
+    "real_life_r2": 0.9003,
+    "overall_accuracy": 98.37,
+    "stockx_accuracy": 99.01,
+    "test_r2": 0.6271,
+    "test_mae": 89.38,
+    "test_rmse": 150.9
+  },
+  "loop_history": [
+    {
+      "iteration": 1,
+      "config": {
+        "iteration": 1,
+        "estimator": "RandomForest",
+        "n_estimators": 100,
+        "max_depth": 14,
+        "weight_2023": 2.0
+      },
+      "real_life_accuracy": 90.05,
+      "real_life_mae": 34.46,
+      "real_life_r2": 0.7457,
+      "overall_accuracy": 98.56,
+      "stockx_accuracy": 99.12,
+      "test_r2": 0.7181,
+      "test_mae": 82.83,
+      "test_rmse": 131.21
+    },
+    {
+      "iteration": 2,
+      "config": {
+        "iteration": 2,
+        "estimator": "RandomForest",
+        "n_estimators": 150,
+        "max_depth": 18,
+        "weight_2023": 4.0
+      },
+      "real_life_accuracy": 91.41,
+      "real_life_mae": 28.77,
+      "real_life_r2": 0.8012,
+      "overall_accuracy": 98.53,
+      "stockx_accuracy": 99.12,
+      "test_r2": 0.7064,
+      "test_mae": 83.73,
+      "test_rmse": 133.89
+    },
+    {
+      "iteration": 3,
+      "config": {
+        "iteration": 3,
+        "estimator": "ExtraTrees",
+        "n_estimators": 150,
+        "max_depth": null,
+        "weight_2023": 5.0
+      },
+      "real_life_accuracy": 95.48,
+      "real_life_mae": 14.06,
+      "real_life_r2": 0.9003,
+      "overall_accuracy": 98.37,
+      "stockx_accuracy": 99.01,
+      "test_r2": 0.6271,
+      "test_mae": 89.38,
+      "test_rmse": 150.9
+    }
+  ]
+}

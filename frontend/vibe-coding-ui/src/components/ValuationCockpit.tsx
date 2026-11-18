@@ -304,14 +304,15 @@ export function ValuationCockpit({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-zinc-800/80 gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <Sliders className="w-6 h-6 text-[#bef264]" />
-            <h2 className="text-xl sm:text-2xl font-black text-white font-sans tracking-tight uppercase">
-              Valuation Input Parameters
-            </h2>
+          <div className="text-xs font-bold font-sans uppercase tracking-wider text-[#bef264] flex items-center gap-1.5 mb-1">
+            <Sliders className="w-3.5 h-3.5 text-[#bef264]" />
+            <span>VALUATION INPUT PARAMETERS</span>
           </div>
-          <p className="text-sm sm:text-base text-zinc-300 font-medium mt-1">
-            Enter sneaker attributes to calculate estimated resale price and COP / DROP recommendation.
+          <h2 className="text-xl sm:text-2xl font-extrabold text-white font-sans tracking-tight">
+            Resale Profit Calculator
+          </h2>
+          <p className="text-sm text-zinc-400 font-medium mt-1">
+            Input sneaker specs to predict secondary market resale value and get an instant COP / DROP verdict.
           </p>
         </div>
 
@@ -328,28 +329,29 @@ export function ValuationCockpit({
             setThreshold(0.15);
             setErrorMsg(null);
           }}
-          className="inline-flex items-center gap-2 text-sm font-mono font-bold text-zinc-400 hover:text-white transition-colors cursor-pointer px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 w-fit"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 w-fit"
         >
-          <RotateCcw className="w-4 h-4" />
+          <RotateCcw className="w-3.5 h-3.5" />
           <span>Reset Defaults</span>
         </button>
       </div>
 
       {/* Quick Preset Badges */}
-      <div className="py-5 border-b border-zinc-800/80">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs sm:text-sm font-mono uppercase tracking-wider text-zinc-400 font-bold flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#bef264]" />
-            Quick Test Presets (One-Click)
+      <div className="py-4 border-b border-zinc-800/80">
+        <div className="flex items-center justify-between mb-2.5">
+          <span className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-[#bef264]" />
+            Quick Presets
           </span>
+          <span className="text-xs text-zinc-400">Click to auto-fill</span>
         </div>
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap gap-2">
           {PRESET_SNEAKERS.map((preset) => (
             <button
               key={preset.name}
               type="button"
               onClick={() => handleSelectPreset(preset)}
-              className="text-xs sm:text-sm px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-[#bef264]/10 hover:border-[#bef264]/50 border border-zinc-800 text-zinc-200 hover:text-white font-medium transition-all cursor-pointer"
+              className="text-xs px-3 py-1.5 rounded-xl bg-zinc-900/90 hover:bg-[#bef264]/15 hover:border-[#bef264]/60 border border-zinc-800 text-zinc-300 hover:text-white font-medium transition-all cursor-pointer"
             >
               {preset.name}
             </button>
@@ -357,70 +359,42 @@ export function ValuationCockpit({
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-7">
-        {/* 1. SNEAKER BRAND DROPDOWN (Mentor Directive: Use a brand dropdown) */}
+      <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+        {/* SNEAKER BRAND */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm sm:text-base font-mono uppercase tracking-wider text-zinc-200 font-bold flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-[#bef264] text-zinc-950 font-black flex items-center justify-center text-xs">
-                1
-              </span>
-              Sneaker Brand (Dropdown)
+            <label className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-300">
+              Sneaker Brand
             </label>
-            <span className="text-xs font-mono text-zinc-400 font-medium">Mentor Requirement</span>
+            <span className="text-xs text-zinc-500 font-sans">Verified StockX catalog</span>
           </div>
 
           <div className="relative">
             <select
               value={brand}
               onChange={(e) => handleBrandSelect(e.target.value)}
-              className="w-full bg-zinc-950 border-2 border-zinc-700 hover:border-zinc-500 rounded-2xl px-5 py-4 text-base sm:text-lg text-white font-mono font-bold focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-all cursor-pointer shadow-inner appearance-none pr-12"
+              className="w-full bg-zinc-950 border border-zinc-800 hover:border-zinc-700 focus:border-[#bef264] rounded-2xl px-5 py-3.5 text-base text-white font-semibold font-sans focus:outline-none focus:ring-2 focus:ring-[#bef264]/20 transition-all cursor-pointer appearance-none pr-12 shadow-sm"
             >
               {brandsList.map((b) => (
-                <option key={b} value={b} className="bg-zinc-900 text-white font-mono font-bold py-2">
+                <option key={b} value={b} className="bg-zinc-900 text-white font-sans py-2">
                   {b}
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-5 text-[#bef264]">
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-5 text-zinc-400">
               <ChevronDown className="w-5 h-5" />
             </div>
           </div>
-
-          {/* Quick Brand Shortcut Pills */}
-          <div className="flex flex-wrap gap-2 mt-3">
-            {brandsList.map((b) => {
-              const isSelected = brand.toLowerCase() === b.toLowerCase();
-              return (
-                <button
-                  key={b}
-                  type="button"
-                  onClick={() => handleBrandSelect(b)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all border cursor-pointer ${
-                    isSelected
-                      ? "bg-[#bef264] text-zinc-950 border-[#bef264] shadow-sm"
-                      : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700"
-                  }`}
-                >
-                  {b}
-                </button>
-              );
-            })}
-          </div>
         </div>
 
-        {/* Sneaker Model Name Dynamic Dropdown (Pops out relevant models for the selected brand) */}
+        {/* Sneaker Model Name */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm sm:text-base font-mono uppercase tracking-wider text-zinc-200 font-bold flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-zinc-800 text-[#bef264] border border-[#bef264]/40 font-black flex items-center justify-center text-xs">
-                ★
-              </span>
-              Sneaker Model Name (Dropdown)
+            <label className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-300">
+              Sneaker Model
             </label>
-            <span className="text-xs font-mono text-[#bef264] font-medium flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#bef264]" />
-              {availableModels.length} {brand} Models
+            <span className="text-xs font-medium text-zinc-400 font-sans">
+              {availableModels.length} {brand} models
             </span>
           </div>
 
@@ -428,20 +402,20 @@ export function ValuationCockpit({
             <select
               value={isCustomModel ? "__CUSTOM__" : sneakerName}
               onChange={(e) => handleModelChange(e.target.value)}
-              className="w-full bg-zinc-950 border-2 border-zinc-700 hover:border-zinc-500 rounded-2xl px-5 py-4 text-base sm:text-lg text-white font-mono font-bold focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-all cursor-pointer shadow-inner appearance-none pr-12"
+              className="w-full bg-zinc-950 border border-zinc-800 hover:border-zinc-700 focus:border-[#bef264] rounded-2xl px-5 py-3.5 text-base text-white font-semibold font-sans focus:outline-none focus:ring-2 focus:ring-[#bef264]/20 transition-all cursor-pointer appearance-none pr-12 shadow-sm"
             >
-              <optgroup label={`Select ${brand} Model`} className="bg-zinc-900 text-white font-mono font-bold">
+              <optgroup label={`Select ${brand} Model`} className="bg-zinc-900 text-white font-sans">
                 {availableModels.map((m) => (
-                  <option key={m.name} value={m.name} className="bg-zinc-900 text-white font-mono font-bold py-2">
+                  <option key={m.name} value={m.name} className="bg-zinc-900 text-white font-sans py-2">
                     {m.name} (MSRP: ${m.retail})
                   </option>
                 ))}
               </optgroup>
-              <option value="__CUSTOM__" className="bg-zinc-800 text-[#bef264] font-mono font-bold py-2">
+              <option value="__CUSTOM__" className="bg-zinc-800 text-[#bef264] font-sans font-bold py-2">
                 ✏️ Custom / Type Another Model...
               </option>
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-5 text-[#bef264]">
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-5 text-zinc-400">
               <ChevronDown className="w-5 h-5" />
             </div>
           </div>
@@ -454,53 +428,24 @@ export function ValuationCockpit({
                 value={customModelName}
                 onChange={(e) => handleCustomModelChange(e.target.value)}
                 placeholder={`Type custom ${brand} model name...`}
-                className="w-full bg-zinc-950 border-2 border-[#bef264]/60 rounded-2xl px-5 py-3.5 text-base sm:text-lg text-white font-medium placeholder-zinc-500 focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-colors"
+                className="w-full bg-zinc-950 border border-[#bef264]/60 rounded-2xl px-5 py-3 text-base text-white font-medium placeholder-zinc-500 focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/20 transition-colors"
                 autoFocus
               />
             </div>
           )}
-
-          {/* Quick Model Shortcut Chips for current brand */}
-          <div className="flex flex-wrap gap-2 mt-3">
-            {availableModels.slice(0, 5).map((m) => {
-              const isSelected = !isCustomModel && sneakerName === m.name;
-              // Clean short label for chip
-              const shortLabel =
-                m.name
-                  .replace(new RegExp(`^(${brand}|Adidas|Nike|Air Jordan|Air|New Balance)\\s+`, "i"), "")
-                  .trim() || m.name;
-              return (
-                <button
-                  key={m.name}
-                  type="button"
-                  onClick={() => handleModelChange(m.name)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all border cursor-pointer ${
-                    isSelected
-                      ? "bg-[#bef264] text-zinc-950 border-[#bef264] shadow-sm"
-                      : "bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700"
-                  }`}
-                >
-                  {shortLabel}
-                </button>
-              );
-            })}
-          </div>
         </div>
 
-        {/* 2 & 3. ORIGINAL SHOP PRICE & SHOE SIZE */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* 2. Original Shop Price */}
+        {/* ORIGINAL SHOP PRICE & SHOE SIZE */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* Original Shop Price */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm sm:text-base font-mono uppercase tracking-wider text-zinc-200 font-bold flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[#bef264] text-zinc-950 font-black flex items-center justify-center text-xs">
-                  2
-                </span>
-                Original Shop Price ($ USD)
+              <label className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-300">
+                Original Retail Price ($ USD)
               </label>
             </div>
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#bef264] font-black text-lg">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#bef264] font-bold text-base">
                 <DollarSign className="w-5 h-5" />
               </div>
               <input
@@ -510,21 +455,15 @@ export function ValuationCockpit({
                 max="5000"
                 value={retailPrice}
                 onChange={(e) => setRetailPrice(Number(e.target.value))}
-                className="w-full bg-zinc-950 border-2 border-zinc-800 rounded-2xl pl-11 pr-5 py-3.5 text-base sm:text-lg text-white font-mono font-bold focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-colors"
+                className="w-full bg-zinc-950 border border-zinc-800 hover:border-zinc-700 focus:border-[#bef264] rounded-2xl pl-11 pr-5 py-3 text-base text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#bef264]/20 transition-colors shadow-sm"
               />
             </div>
-            <p className="text-xs text-zinc-400 mt-1.5 font-sans">
-              Enter sensible dollar price (e.g. $160 – $220).
-            </p>
           </div>
 
-          {/* 3. Shoe Size */}
+          {/* Shoe Size */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-sm sm:text-base font-mono uppercase tracking-wider text-zinc-200 font-bold flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-[#bef264] text-zinc-950 font-black flex items-center justify-center text-xs">
-                  3
-                </span>
+              <label className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-300">
                 Shoe Size (US Men's)
               </label>
             </div>
@@ -535,7 +474,7 @@ export function ValuationCockpit({
               <select
                 value={shoeSize}
                 onChange={(e) => setShoeSize(Number(e.target.value))}
-                className="w-full bg-zinc-950 border-2 border-zinc-800 rounded-2xl pl-11 pr-5 py-3.5 text-base sm:text-lg text-white font-mono font-bold focus:outline-none focus:border-[#bef264] focus:ring-2 focus:ring-[#bef264]/30 transition-colors cursor-pointer appearance-none"
+                className="w-full bg-zinc-950 border border-zinc-800 hover:border-zinc-700 focus:border-[#bef264] rounded-2xl pl-11 pr-10 py-3 text-base text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#bef264]/20 transition-colors cursor-pointer appearance-none shadow-sm"
               >
                 {SHOE_SIZES.map((size) => (
                   <option key={size} value={size} className="bg-zinc-900 text-white font-mono font-bold">
@@ -543,23 +482,20 @@ export function ValuationCockpit({
                   </option>
                 ))}
               </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-zinc-400">
+                <ChevronDown className="w-4 h-4" />
+              </div>
             </div>
-            <p className="text-xs text-zinc-400 mt-1.5 font-sans">
-              Half-sizes 4.0 to 15.0 per StockX standard.
-            </p>
           </div>
         </div>
 
-        {/* 4. NUMBER OF DAYS SINCE RELEASE */}
+        {/* NUMBER OF DAYS SINCE RELEASE */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-sm sm:text-base font-mono uppercase tracking-wider text-zinc-200 font-bold flex items-center gap-2">
-              <span className="w-6 h-6 rounded-full bg-[#bef264] text-zinc-950 font-black flex items-center justify-center text-xs">
-                4
-              </span>
-              Number of Days Since Release
+            <label className="text-xs font-bold font-sans uppercase tracking-wider text-zinc-300">
+              Holding Period / Days Since Release
             </label>
-            <span className="text-base sm:text-lg text-[#bef264] font-black font-mono">
+            <span className="text-sm text-[#bef264] font-bold font-mono">
               {daysSinceRelease} Days
             </span>
           </div>
@@ -572,7 +508,7 @@ export function ValuationCockpit({
               step="1"
               value={daysSinceRelease}
               onChange={(e) => setDaysSinceRelease(Number(e.target.value))}
-              className="w-full h-3 bg-zinc-950 rounded-lg appearance-none cursor-pointer accent-[#bef264]"
+              className="w-full h-2 bg-zinc-950 rounded-lg appearance-none cursor-pointer accent-[#bef264]"
             />
             <input
               type="number"
@@ -580,19 +516,19 @@ export function ValuationCockpit({
               max="1000"
               value={daysSinceRelease}
               onChange={(e) => setDaysSinceRelease(Math.max(0, Number(e.target.value)))}
-              className="w-24 bg-zinc-950 border-2 border-zinc-800 rounded-xl px-3 py-2 text-center text-base font-mono font-bold text-white focus:outline-none focus:border-[#bef264]"
+              className="w-24 bg-zinc-950 border border-zinc-800 focus:border-[#bef264] rounded-xl px-3 py-2 text-center text-sm font-mono font-bold text-white focus:outline-none shadow-sm"
             />
           </div>
 
-          <div className="flex flex-wrap gap-2 mt-3">
+          <div className="flex flex-wrap gap-2 mt-2.5">
             {DAY_PRESETS.map((p) => (
               <button
                 key={p.days}
                 type="button"
                 onClick={() => setDaysSinceRelease(p.days)}
-                className={`text-xs sm:text-sm font-mono px-3 py-1.5 rounded-xl border transition-all cursor-pointer font-bold ${
+                className={`text-xs px-3 py-1 rounded-lg border transition-all cursor-pointer font-semibold ${
                   daysSinceRelease === p.days
-                    ? "bg-[#bef264] text-zinc-950 border-[#bef264]"
+                    ? "bg-[#bef264] text-zinc-950 border-[#bef264] font-bold"
                     : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white"
                 }`}
               >
@@ -614,16 +550,16 @@ export function ValuationCockpit({
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-4 px-8 rounded-2xl bg-[#bef264] hover:bg-[#a3e635] text-zinc-950 font-black text-base sm:text-lg tracking-tight shadow-xl shadow-[#bef264]/20 transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group active:scale-[0.99]"
+          className="w-full py-4 px-8 rounded-2xl bg-[#bef264] hover:bg-[#a3e635] text-zinc-950 font-black text-base tracking-tight shadow-xl shadow-[#bef264]/20 transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed group active:scale-[0.99]"
         >
           {isLoading ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 font-sans">
               <div className="w-5 h-5 border-3 border-zinc-950/30 border-t-zinc-950 rounded-full animate-spin" />
               <span>Calculating Model Inference...</span>
             </div>
           ) : (
             <>
-              <span>CALCULATE RESALE VALUATION (COP / DROP)</span>
+              <span className="font-extrabold font-sans uppercase tracking-tight">Calculate Resale Valuation & Verdict</span>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </>
           )}

@@ -43,14 +43,14 @@ export function HoloTiltCard({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ perspective: 1000 }}
-      className={`relative rounded-2xl transition-transform duration-200 ease-out ${className}`}
+      className={`relative rounded-3xl transition-transform duration-200 ease-out ${className}`}
     >
       <div
         style={{
           transform: `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)`,
           transformStyle: "preserve-3d",
         }}
-        className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6 backdrop-blur-md transition-transform duration-150"
+        className="relative overflow-hidden rounded-3xl border-2 border-zinc-800 bg-[#121215] p-6 sm:p-8 backdrop-blur-md transition-transform duration-150 shadow-2xl"
       >
         <div
           style={{
