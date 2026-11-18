@@ -15,15 +15,15 @@ interface SneakerCard3DProps {
 
 function plainEnglishLine(result: PredictResponse, hurdlePct: number): string {
   const profit = result.estimated_profit;
-  const targetProfit = result.retail_price * hurdlePct / 100;
-  if (result.verdict === "COP") {
+  const targetProfit = (result.retail_price * hurdlePct) / 100;
+  if (profit >= targetProfit && profit > 0) {
     const marginOverTarget = Math.max(0, profit - targetProfit);
-    return `Expected resale clears your ${hurdlePct}% target by $${marginOverTarget.toFixed(2)}. Worth buying at this price.`;
+    return `Expected resale clears your ${hurdlePct}% target with +$${marginOverTarget.toFixed(2)} excess return. Highly profitable trade.`;
   }
   if (profit >= 0) {
-    return `Resale is expected above retail, but it misses your ${hurdlePct}% target. Pass at this price.`;
+    return `Resale is expected above retail, but generates a slim margin below your ${hurdlePct}% target. Moderate return risk.`;
   }
-  return `Expected resale is $${Math.abs(profit).toFixed(2)} below retail. Pass at this price.`;
+  return `Expected resale is $${Math.abs(profit).toFixed(2)} below retail price. Risk of loss at current purchase price.`;
 }
 
 export function SneakerCard3D({ result, isLoading, threshold = 0.15 }: SneakerCard3DProps) {
@@ -49,7 +49,7 @@ export function SneakerCard3D({ result, isLoading, threshold = 0.15 }: SneakerCa
             Ready when you are
           </h3>
           <p className="mt-2 max-w-xs text-14 leading-relaxed text-ink-3">
-            Check a pair to see the predicted resale price and a clear COP or DROP verdict.
+            Check a pair to see the predicted resale price and a clear profit or loss appraisal.
           </p>
         </div>
       </HoloTiltCard>
@@ -91,15 +91,20 @@ export function SneakerCard3D({ result, isLoading, threshold = 0.15 }: SneakerCa
             isCop ? "border-cop/50 bg-cop/10" : "border-drop/50 bg-drop/10"
           }`}
         >
-          <span
-            className={`inline-flex items-center rounded-card px-4 py-2 text-22 font-extrabold tracking-[0.08em] ${
-              isCop ? "bg-cop text-cop-ink" : "bg-drop text-drop-ink"
-            }`}
-          >
-            {result.verdict}
-          </span>
+          <div className="flex items-center justify-between gap-2">
+            <span
+              className={`inline-flex items-center rounded-card px-4 py-2 text-22 font-extrabold tracking-[0.08em] ${
+                isCop ? "bg-cop text-cop-ink" : "bg-drop text-drop-ink"
+              }`}
+            >
+              {isCop ? "+ PROFIT" : "- LOSS"}
+            </span>
+            <span className="font-mono text-11 font-bold uppercase tracking-wider text-ink-3">
+              Appraisal Verdict
+            </span>
+          </div>
           <p className={`mt-3 text-14 font-semibold ${isCop ? "text-cop" : "text-drop"}`}>
-            {isCop ? "Clears your target" : profit >= 0 ? "Below your target" : "Below retail"}
+            {isCop ? "Clears your target hurdle" : profit >= 0 ? "Positive but below hurdle" : "Projected negative return"}
           </p>
         </div>
 

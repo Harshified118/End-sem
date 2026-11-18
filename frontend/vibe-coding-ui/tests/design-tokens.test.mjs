@@ -50,6 +50,9 @@ for (const required of [
   assert(source.includes(required), `Missing required copy/data: ${required}`);
 }
 
+const card3d = read("src/components/SneakerCard3D.tsx");
+assert(card3d.includes("PROFIT") && card3d.includes("LOSS"), "Verdict badge must display PROFIT and LOSS");
+
 const design = read("DESIGN.md");
 assert(design.includes("Motion rules"), "DESIGN.md must document motion");
 assert(design.includes("Reduced motion"), "DESIGN.md must document the reduced-motion clause");
