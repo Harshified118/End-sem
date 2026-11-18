@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowDown } from "lucide-react";
+import { ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { REFERENCE_SNEAKERS, formatSpread, sampleProfit } from "@/lib/sneakers";
 import { Shoe360 } from "./Shoe360";
 import { Reveal } from "./motion/Reveal";
@@ -20,6 +20,7 @@ export function Hero({ onExploreClick, onSelectSneaker }: HeroProps) {
   const [index, setIndex] = useState(0);
   const [branch, setBranch] = useState<"left" | "right" | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const shoe = REFERENCE_SNEAKERS[index];
 
@@ -30,6 +31,14 @@ export function Hero({ onExploreClick, onSelectSneaker }: HeroProps) {
     media.addEventListener("change", update);
     return () => media.removeEventListener("change", update);
   }, []);
+
+  useEffect(() => {
+    if (reducedMotion || isPaused) return;
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % REFERENCE_SNEAKERS.length);
+    }, 7000);
+    return () => clearInterval(interval);
+  }, [reducedMotion, isPaused]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -76,6 +85,14 @@ export function Hero({ onExploreClick, onSelectSneaker }: HeroProps) {
     setBranch(null);
     onSelectSneaker(next);
   };
+  const prevShoe = () => {
+    const next = (index - 1 + REFERENCE_SNEAKERS.length) % REFERENCE_SNEAKERS.length;
+    select(next);
+  };
+  const nextShoe = () => {
+    const next = (index + 1) % REFERENCE_SNEAKERS.length;
+    select(next);
+  };
 
   const leftItems: [string, string][] = [
     ["Retail price", `$${shoe.retail}`],
@@ -105,15 +122,15 @@ export function Hero({ onExploreClick, onSelectSneaker }: HeroProps) {
       id="top"
       ref={containerRef}
       aria-labelledby="hero-heading"
-      className="relative w-full overflow-hidden px-4 pb-10 pt-10 sm:px-6 sm:pt-14 lg:px-8"
+      className="relative w-full overflow-x-clip px-4 pb-12 pt-10 sm:px-6 sm:pt-14 lg:px-8"
     >
-      <div className="mx-auto grid w-full max-w-7xl items-center gap-8 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-12">
+      <div className="mx-auto grid w-full max-w-7xl items-center gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-14">
         <Reveal className="max-w-xl">
-          <h1 id="hero-heading" data-reveal-item className="text-28 font-extrabold leading-[1.08] tracking-[-0.03em] text-ink-1 sm:text-40">
-            Know the resale price before you buy.
+          <h1 id="hero-heading" data-reveal-item className="text-40 font-extrabold leading-[1.04] tracking-[-0.03em] text-ink-1 sm:text-56 lg:text-64">
+            Know The Resale You Buy
           </h1>
           <p data-reveal-item className="mt-4 max-w-md text-16 leading-relaxed text-ink-3">
-            DropOrCop predicts a sneaker&apos;s resale value and gives you a COP or DROP verdict.
+            Predict secondary market resale values and calculate your net profit or loss before you buy.
           </p>
           <div data-reveal-item className="mt-7">
             <button
@@ -128,7 +145,12 @@ export function Hero({ onExploreClick, onSelectSneaker }: HeroProps) {
         </Reveal>
 
         <div ref={visualRef} className="relative min-w-0">
-          <div ref={stageRef} className="relative">
+          <div
+            ref={stageRef}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            className="relative rounded-panel border border-hairline bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05)_0%,transparent_68%)] px-2 py-4 sm:px-4 sm:py-6"
+          >
             <Shoe360
               key={`${shoe.id}-${reducedMotion}`}
               shoe={shoe}
@@ -154,19 +176,39 @@ export function Hero({ onExploreClick, onSelectSneaker }: HeroProps) {
             )}
           </div>
 
-          <div className="mt-3 flex items-center justify-center gap-2" role="group" aria-label="Sneaker gallery">
-            {REFERENCE_SNEAKERS.map((item, dotIndex) => (
-              <button
-                key={item.id}
-                type="button"
-                aria-label={`Show ${item.name}`}
-                aria-pressed={index === dotIndex}
-                onClick={() => select(dotIndex)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  index === dotIndex ? "w-6 bg-accent" : "w-1.5 bg-hairline hover:bg-ink-4"
-                }`}
-              />
-            ))}
+          <div className="mt-4 flex items-center justify-center gap-3" role="group" aria-label="Sneaker gallery navigation">
+            <button
+              type="button"
+              onClick={prevShoe}
+              aria-label="Previous sneaker"
+              className="grid size-8 place-items-center rounded-full border border-hairline bg-surface text-ink-2 transition-all hover:border-accent hover:text-accent-readable active:scale-95"
+            >
+              <ChevronLeft className="size-4" aria-hidden="true" />
+            </button>
+
+            <div className="flex items-center gap-2">
+              {REFERENCE_SNEAKERS.map((item, dotIndex) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-label={`Show ${item.name}`}
+                  aria-pressed={index === dotIndex}
+                  onClick={() => select(dotIndex)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    index === dotIndex ? "w-6 bg-accent" : "w-1.5 bg-hairline hover:bg-ink-4"
+                  }`}
+                />
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={nextShoe}
+              aria-label="Next sneaker"
+              className="grid size-8 place-items-center rounded-full border border-hairline bg-surface text-ink-2 transition-all hover:border-accent hover:text-accent-readable active:scale-95"
+            >
+              <ChevronRight className="size-4" aria-hidden="true" />
+            </button>
           </div>
           <p className="mt-4 text-center text-12 text-ink-3 sm:text-14">
             {shoe.name} <span className="font-mono tabular text-accent-readable">{formatSpread(shoe)}</span>
