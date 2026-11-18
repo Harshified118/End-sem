@@ -16,6 +16,9 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: !prefersReduced,
+      // Keep native document scrolling unlocked so the page always remains scrollable.
+      syncTouch: false,
+      touchMultiplier: 1.4,
     });
     registerLenis(lenis);
 

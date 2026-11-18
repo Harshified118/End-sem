@@ -13,15 +13,13 @@ export interface HeaderProps {
   onSelectSneaker?: (sneaker: CatalogSneaker) => void;
 }
 
-export function Header({ health, onRefreshHealth, onSelectSneaker }: HeaderProps) {
+export function Header({ onSelectSneaker }: HeaderProps) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlighted, setHighlighted] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const listId = useId();
-
-  const modelOnline = Boolean(health?.model_loaded);
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();

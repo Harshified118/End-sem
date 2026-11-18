@@ -195,7 +195,8 @@ export default function Home() {
     (
       sneaker:
         | Pick<CatalogSneaker, "brand" | "name" | "retail" | "size" | "days">
-        | Partial<PredictPayload>
+        | Partial<PredictPayload>,
+      shouldScroll = true
     ) => {
       const payload: Partial<PredictPayload> =
         "retail" in sneaker
@@ -224,18 +225,20 @@ export default function Home() {
           threshold: 0.15,
         });
       }
-      scrollToSection("valuation-cockpit-section");
+      if (shouldScroll) {
+        scrollToSection("valuation-cockpit-section");
+      }
     },
     [runPrediction]
   );
 
   const handleHeroSelect = (index: number) => {
     const sneaker = REFERENCE_SNEAKERS[index];
-    if (sneaker) handleValuateSneaker(sneaker);
+    if (sneaker) handleValuateSneaker(sneaker, false);
   };
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-clip bg-canvas text-ink-1">
+    <div className="flex min-h-screen flex-col overflow-x-clip overflow-y-visible bg-canvas text-ink-1">
       <Header
         health={health}
         onRefreshHealth={handleRefreshHealth}

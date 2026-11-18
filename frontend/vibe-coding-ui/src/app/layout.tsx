@@ -32,7 +32,7 @@ export default function RootLayout({
       lang="en"
       data-theme="dark"
       suppressHydrationWarning
-      className={`h-full antialiased ${jakarta.variable} ${jetbrains.variable}`}
+      className={`min-h-full antialiased ${jakarta.variable} ${jetbrains.variable}`}
     >
       <head>
         <script
@@ -41,7 +41,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="flex min-h-full flex-col bg-canvas text-ink-1">
+      <body className="flex min-h-full flex-col overflow-y-auto bg-canvas text-ink-1">
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
       </body>
     </html>

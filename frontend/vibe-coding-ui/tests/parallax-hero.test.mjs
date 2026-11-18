@@ -25,4 +25,10 @@ assert(hero.includes("Know The Resale You Buy"), "Headline must be 'Know The Res
 assert(hero.includes("profit or loss"), "Hero subtitle must reference profit or loss instead of cop or drop");
 assert(hero.includes("ChevronLeft") && hero.includes("ChevronRight"), "Hero must include one-by-one carousel arrows");
 
+const pageSrc = read("src/app/page.tsx");
+assert(
+  pageSrc.includes("handleHeroSelect") && /handleHeroSelect[\s\S]*?handleValuateSneaker\([^)]*false\)/.test(pageSrc),
+  "Hero shoe selection must not trigger auto-scroll (shouldScroll: false)"
+);
+
 console.log("PASS: hero + 360 + branch verification passed");

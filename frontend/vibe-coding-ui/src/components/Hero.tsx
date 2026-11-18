@@ -34,11 +34,11 @@ export function Hero({ onExploreClick, onSelectSneaker }: HeroProps) {
 
   useEffect(() => {
     if (reducedMotion || isPaused) return;
-    const interval = setInterval(() => {
+    const timer = setTimeout(() => {
       setIndex((prev) => (prev + 1) % REFERENCE_SNEAKERS.length);
     }, 7000);
-    return () => clearInterval(interval);
-  }, [reducedMotion, isPaused]);
+    return () => clearTimeout(timer);
+  }, [index, reducedMotion, isPaused]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

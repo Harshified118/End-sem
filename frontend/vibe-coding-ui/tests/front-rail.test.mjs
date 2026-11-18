@@ -16,5 +16,9 @@ assert(!watchlist.includes("ShoeRotator360"), "Watchlist cards stay calm: no per
 assert(watchlist.includes("retail"), "Card shows retail price");
 assert(watchlist.includes('id="wishlist-section"'), "Section must have id='wishlist-section'");
 assert(watchlist.includes("Popular Sneaker Wishlist"), "Section heading must be 'Popular Sneaker Wishlist'");
+assert(
+  watchlist.includes("sneaker.spriteId || sneaker.id") || watchlist.includes("spriteId"),
+  "Wishlist images must fallback to spriteId to prevent 404 on missing hero assets"
+);
 
 console.log("PASS: watchlist verification passed");

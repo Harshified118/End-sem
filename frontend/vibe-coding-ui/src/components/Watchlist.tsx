@@ -49,7 +49,7 @@ export function Watchlist({ onSelectSneaker }: WatchlistProps) {
                 >
                   <div className="relative mb-3 flex h-44 items-center justify-center overflow-hidden rounded-card bg-inset">
                     <Image
-                      src={`${BASE}/shoes/${sneaker.id}_hero.webp`}
+                      src={`${BASE}/shoes/${sneaker.spriteId || sneaker.id}_hero.webp`}
                       alt={sneaker.name}
                       width={800}
                       height={500}

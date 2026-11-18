@@ -53,7 +53,6 @@ export function Shoe360({ shoe, onTap, reducedMotion }: Shoe360Props) {
   );
 
   useEffect(() => {
-    setReady(false);
     preloaded.current = new Set();
     let cancelled = false;
 

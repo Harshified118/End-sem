@@ -57,6 +57,7 @@ export function SneakerCard3D({ result, isLoading, threshold = 0.15 }: SneakerCa
   }
 
   const isCop = result.verdict === "COP";
+  const isProfitable = result.estimated_profit >= 0;
   const hurdlePct = Math.round(threshold * 100);
   const profit = result.estimated_profit;
 
@@ -88,23 +89,27 @@ export function SneakerCard3D({ result, isLoading, threshold = 0.15 }: SneakerCa
 
         <div
           className={`rounded-panel border p-4 ${
-            isCop ? "border-cop/50 bg-cop/10" : "border-drop/50 bg-drop/10"
+            isProfitable ? "border-cop/50 bg-cop/10" : "border-drop/50 bg-drop/10"
           }`}
         >
           <div className="flex items-center justify-between gap-2">
             <span
               className={`inline-flex items-center rounded-card px-4 py-2 text-22 font-extrabold tracking-[0.08em] ${
-                isCop ? "bg-cop text-cop-ink" : "bg-drop text-drop-ink"
+                isProfitable ? "bg-cop text-cop-ink" : "bg-drop text-drop-ink"
               }`}
             >
-              {isCop ? "+ PROFIT" : "- LOSS"}
+              {isProfitable ? "+ PROFIT" : "- LOSS"}
             </span>
             <span className="font-mono text-11 font-bold uppercase tracking-wider text-ink-3">
               Appraisal Verdict
             </span>
           </div>
-          <p className={`mt-3 text-14 font-semibold ${isCop ? "text-cop" : "text-drop"}`}>
-            {isCop ? "Clears your target hurdle" : profit >= 0 ? "Positive but below hurdle" : "Projected negative return"}
+          <p className={`mt-3 text-14 font-semibold ${isProfitable ? "text-cop" : "text-drop"}`}>
+            {isCop
+              ? "Clears your target hurdle"
+              : isProfitable
+              ? "Positive profit (below hurdle)"
+              : "Projected loss at current retail"}
           </p>
         </div>
 

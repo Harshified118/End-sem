@@ -20,6 +20,7 @@ for (const token of [
   "--ink-3: #a1a1aa",
   "--ink-4: #71717a",
   "--text-12", "--text-14", "--text-16", "--text-18", "--text-22", "--text-28", "--text-40",
+  "--text-56", "--text-64",
   "--radius-card", "--radius-panel",
 ]) {
   assert(css.includes(token), `Missing design token: ${token}`);
@@ -52,6 +53,11 @@ for (const required of [
 
 const card3d = read("src/components/SneakerCard3D.tsx");
 assert(card3d.includes("PROFIT") && card3d.includes("LOSS"), "Verdict badge must display PROFIT and LOSS");
+assert(
+  card3d.includes('isProfitable ? "+ PROFIT" : "- LOSS"') ||
+  card3d.includes('result.estimated_profit >= 0 ? "+ PROFIT" : "- LOSS"'),
+  "Verdict badge must check actual profit (>= 0), not verdict threshold"
+);
 
 const design = read("DESIGN.md");
 assert(design.includes("Motion rules"), "DESIGN.md must document motion");
