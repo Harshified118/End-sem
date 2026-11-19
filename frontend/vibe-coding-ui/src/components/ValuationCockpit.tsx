@@ -373,15 +373,6 @@ export function ValuationCockpit({
             </select>
             <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 text-ink-3 [transform:translateY(-50%)]" aria-hidden="true" />
           </div>
-          {isExtrapolatedBrand && (
-            <div className="mt-2 flex items-start gap-2 rounded-card border border-warn/40 bg-warn/10 px-3 py-2 text-12 leading-snug text-warn">
-              <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-              <span>
-                {brand} was not in the training data. The model will still estimate a price; treat
-                the margin with extra skepticism.
-              </span>
-            </div>
-          )}
         </div>
 
         <div>

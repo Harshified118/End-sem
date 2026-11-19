@@ -66,14 +66,7 @@ export function HistoryLedger({
         </button>
       </div>
 
-      {isOffline && (
-        <div className="mt-4 flex items-start gap-2 rounded-card border border-warn/40 bg-warn/10 px-3 py-2 text-12 leading-snug text-warn">
-          <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          <span>
-            Backend offline — showing saved checks. New results are labelled offline estimates.
-          </span>
-        </div>
-      )}
+
 
       {records.length === 0 ? (
         <div className="flex flex-col items-center gap-4 py-12 text-center">

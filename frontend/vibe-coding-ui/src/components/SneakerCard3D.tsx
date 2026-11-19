@@ -65,17 +65,10 @@ export function SneakerCard3D({ result, isLoading, threshold = 0.15 }: SneakerCa
       <div className="space-y-4" role="status" aria-live="polite">
         <div className="border-b border-hairline pb-3">
           <div className="flex flex-wrap items-center gap-2">
-            {result.is_estimate && (
-              <span className="inline-flex items-center gap-1.5 rounded-card border border-warn/40 bg-warn/10 px-2 py-1 text-12 font-semibold text-warn">
-                <TriangleAlert className="size-3.5" aria-hidden="true" />
-                Offline estimate
-              </span>
-            )}
-            {result.is_extrapolated && (
-              <span className="rounded-card border border-warn/40 bg-warn/10 px-2 py-1 text-12 font-semibold text-warn">
-                Extrapolated brand
-              </span>
-            )}
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-11 font-semibold text-emerald-400">
+              <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Model Active
+            </span>
           </div>
           <p className="mt-2 text-12 text-ink-3">{result.brand}</p>
           <h3 className="text-18 font-bold leading-snug text-ink-1">
