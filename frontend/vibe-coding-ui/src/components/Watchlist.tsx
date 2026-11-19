@@ -33,7 +33,7 @@ export function Watchlist({ onSelectSneaker }: WatchlistProps) {
             </h2>
           </div>
           <p data-reveal-item className="text-12 text-ink-3">
-            Curated high-liquidity pairs. Pick any pair to instantly calculate its resale profit or loss.
+            Curated popular pairs. Pick any pair to instantly calculate its resale profit or loss.
           </p>
         </div>
 
@@ -57,8 +57,8 @@ export function Watchlist({ onSelectSneaker }: WatchlistProps) {
                       sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 360px"
                       className="h-full w-full object-contain p-3 drop-shadow-[0_12px_20px_rgba(0,0,0,0.45)]"
                     />
-                    <span className="absolute right-2 top-2 rounded-card border border-hairline bg-canvas/80 px-2 py-1 font-mono text-12 font-bold tabular text-accent-readable">
-                      {formatSpread(sneaker)}
+                    <span className="absolute right-2 top-2 rounded-card border border-hairline bg-canvas/90 px-2.5 py-1 font-mono text-12 font-bold tabular text-accent-readable shadow-sm">
+                      {formatSpread(sneaker, 0)} Profit
                     </span>
                   </div>
                   <p className="text-12 text-ink-3">{sneaker.brand}</p>

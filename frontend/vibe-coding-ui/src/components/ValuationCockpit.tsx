@@ -315,7 +315,7 @@ export function ValuationCockpit({
             Check a pair
           </h2>
           <p className="mt-1 max-w-md text-14 text-ink-3">
-            Enter the pair and your target. The verdict compares projected return with that target.
+            Enter sneaker details to estimate resale profit.
           </p>
         </div>
         <button
@@ -512,7 +512,7 @@ export function ValuationCockpit({
               </button>
             ))}
           </div>
-          <p className="mt-2 text-12 text-ink-3">Number of days since release drives the time factor.</p>
+          <p className="mt-2 text-12 text-ink-3">Counted in days since release.</p>
         </div>
 
         <fieldset>
@@ -559,7 +559,7 @@ export function ValuationCockpit({
             ))}
           </div>
           <p className="mt-2 text-12 text-ink-3">
-            Your verdict is COP only when projected ROI clears this target.
+            Suggested to buy only if expected profit meets this target.
           </p>
         </fieldset>
 

@@ -21,7 +21,7 @@ assert(hero.includes("handleClickOutside") || hero.includes("mousedown"), "Outsi
 assert(hero.includes("Check profit"), "Exactly one CTA");
 assert(hero.split("Check profit").length - 1 === 1, "Only one hero CTA");
 
-assert(hero.includes("Know The Resale You Buy"), "Headline must be 'Know The Resale You Buy'");
+assert(hero.includes("Know The Resale Price") || hero.includes("Know the resale price"), "Headline must be 'Know The Resale Price'");
 assert(hero.includes("profit or loss"), "Hero subtitle must reference profit or loss instead of cop or drop");
 assert(hero.includes("ChevronLeft") && hero.includes("ChevronRight"), "Hero must include one-by-one carousel arrows");
 

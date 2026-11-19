@@ -18,6 +18,7 @@ export function Hero({ onExploreClick, onSelectSneaker }: HeroProps) {
   const visualRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState<number>(1);
   const [branch, setBranch] = useState<"left" | "right" | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -35,6 +36,7 @@ export function Hero({ onExploreClick, onSelectSneaker }: HeroProps) {
   useEffect(() => {
     if (reducedMotion || isPaused) return;
     const timer = setTimeout(() => {
+      setDirection(1);
       setIndex((prev) => (prev + 1) % REFERENCE_SNEAKERS.length);
     }, 7000);
     return () => clearTimeout(timer);
@@ -80,18 +82,19 @@ export function Hero({ onExploreClick, onSelectSneaker }: HeroProps) {
   }, [reducedMotion]);
 
   const onTap = (side: "left" | "right") => setBranch((prev) => (prev === side ? null : side));
-  const select = (next: number) => {
+  const select = (next: number, dir?: number) => {
+    setDirection(dir !== undefined ? dir : next > index ? 1 : -1);
     setIndex(next);
     setBranch(null);
     onSelectSneaker(next);
   };
   const prevShoe = () => {
     const next = (index - 1 + REFERENCE_SNEAKERS.length) % REFERENCE_SNEAKERS.length;
-    select(next);
+    select(next, -1);
   };
   const nextShoe = () => {
     const next = (index + 1) % REFERENCE_SNEAKERS.length;
-    select(next);
+    select(next, 1);
   };
 
   const leftItems: [string, string][] = [
@@ -126,11 +129,11 @@ export function Hero({ onExploreClick, onSelectSneaker }: HeroProps) {
     >
       <div className="mx-auto grid w-full max-w-7xl items-center gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-14">
         <Reveal className="max-w-xl">
-          <h1 id="hero-heading" data-reveal-item className="text-40 font-extrabold leading-[1.04] tracking-[-0.03em] text-ink-1 sm:text-56 lg:text-64">
-            Know The Resale You Buy
+          <h1 id="hero-heading" data-reveal-item className="text-48 font-black leading-[1.02] tracking-[-0.04em] text-ink-1 sm:text-64 lg:text-72 xl:text-80">
+            Know The Resale Price
           </h1>
           <p data-reveal-item className="mt-4 max-w-md text-16 leading-relaxed text-ink-3">
-            Predict secondary market resale values and calculate your net profit or loss before you buy.
+            Predict sneaker resale values and calculate your profit or loss before you buy.
           </p>
           <div data-reveal-item className="mt-7">
             <button
@@ -152,8 +155,8 @@ export function Hero({ onExploreClick, onSelectSneaker }: HeroProps) {
             className="relative rounded-panel border border-hairline bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.05)_0%,transparent_68%)] px-2 py-4 sm:px-4 sm:py-6"
           >
             <Shoe360
-              key={`${shoe.id}-${reducedMotion}`}
               shoe={shoe}
+              direction={direction}
               onTap={onTap}
               reducedMotion={reducedMotion}
             />

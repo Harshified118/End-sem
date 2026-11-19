@@ -43,6 +43,10 @@ for (const fragment of [
 ]) {
   assert(layout.includes(fragment), `Theme bootstrap must include: ${fragment}`);
 }
+assert(
+  /<body[^>]*suppressHydrationWarning/.test(layout),
+  "RootLayout body must have suppressHydrationWarning to prevent hydration mismatch from browser extensions"
+);
 
 // Task 3 — header control
 assert(

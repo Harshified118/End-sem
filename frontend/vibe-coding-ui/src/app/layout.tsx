@@ -41,7 +41,10 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="flex min-h-full flex-col overflow-y-auto bg-canvas text-ink-1">
+      <body
+        suppressHydrationWarning
+        className="flex min-h-full flex-col overflow-y-auto bg-canvas text-ink-1"
+      >
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
       </body>
     </html>

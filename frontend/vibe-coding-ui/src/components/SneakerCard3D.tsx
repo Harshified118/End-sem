@@ -17,13 +17,12 @@ function plainEnglishLine(result: PredictResponse, hurdlePct: number): string {
   const profit = result.estimated_profit;
   const targetProfit = (result.retail_price * hurdlePct) / 100;
   if (profit >= targetProfit && profit > 0) {
-    const marginOverTarget = Math.max(0, profit - targetProfit);
-    return `Expected resale clears your ${hurdlePct}% target with +$${marginOverTarget.toFixed(2)} excess return. Highly profitable trade.`;
+    return `Expected resale gives you a solid profit above your ${hurdlePct}% target. Good pair to buy!`;
   }
   if (profit >= 0) {
-    return `Resale is expected above retail, but generates a slim margin below your ${hurdlePct}% target. Moderate return risk.`;
+    return `Resale is higher than retail, but profit is below your ${hurdlePct}% target.`;
   }
-  return `Expected resale is $${Math.abs(profit).toFixed(2)} below retail price. Risk of loss at current purchase price.`;
+  return `Resale is below retail price. Buying this pair may lose money.`;
 }
 
 export function SneakerCard3D({ result, isLoading, threshold = 0.15 }: SneakerCard3DProps) {
@@ -49,7 +48,7 @@ export function SneakerCard3D({ result, isLoading, threshold = 0.15 }: SneakerCa
             Ready when you are
           </h3>
           <p className="mt-2 max-w-xs text-14 leading-relaxed text-ink-3">
-            Check a pair to see the predicted resale price and a clear profit or loss appraisal.
+            Check a pair to see the predicted resale price and estimated profit.
           </p>
         </div>
       </HoloTiltCard>
@@ -101,21 +100,21 @@ export function SneakerCard3D({ result, isLoading, threshold = 0.15 }: SneakerCa
               {isProfitable ? "+ PROFIT" : "- LOSS"}
             </span>
             <span className="font-mono text-11 font-bold uppercase tracking-wider text-ink-3">
-              Appraisal Verdict
+              Verdict
             </span>
           </div>
           <p className={`mt-3 text-14 font-semibold ${isProfitable ? "text-cop" : "text-drop"}`}>
             {isCop
-              ? "Clears your target hurdle"
+              ? "Good buy · Meets your profit target"
               : isProfitable
-              ? "Positive profit (below hurdle)"
-              : "Projected loss at current retail"}
+              ? "Profitable, but below target"
+              : "Expected loss · Resale is below retail"}
           </p>
         </div>
 
         <div className="rounded-panel border border-hairline bg-inset p-4">
           <p className="text-12 font-semibold uppercase tracking-[0.16em] text-ink-3">
-            Predicted resale
+            Estimated resale
           </p>
           <p className="mt-1 text-40 font-extrabold tracking-tight text-ink-1">
             <AnimatedPriceCounter value={result.estimated_resale_price} />
@@ -124,13 +123,13 @@ export function SneakerCard3D({ result, isLoading, threshold = 0.15 }: SneakerCa
 
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-card border border-hairline bg-inset p-3">
-            <p className="text-12 text-ink-3">Net P/L</p>
+            <p className="text-12 text-ink-3">Est. Profit</p>
             <p className={`mt-1 font-mono text-22 font-bold tabular ${profit >= 0 ? "text-cop" : "text-drop"}`}>
               {profit >= 0 ? "+" : ""}${profit.toFixed(2)}
             </p>
           </div>
           <div className="rounded-card border border-hairline bg-inset p-3">
-            <p className="text-12 text-ink-3">ROI</p>
+            <p className="text-12 text-ink-3">Return %</p>
             <p className={`mt-1 font-mono text-22 font-bold tabular ${profit >= 0 ? "text-cop" : "text-drop"}`}>
               {profit >= 0 ? "+" : ""}{result.profit_margin_pct.toFixed(1)}%
             </p>

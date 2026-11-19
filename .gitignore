@@ -67,5 +67,27 @@ frontend/vibe-coding-ui/verify-*.js
 frontend/vibe-coding-ui/capture-points.js
 frontend/vibe-coding-ui/test-*.js
 frontend/vibe-coding-ui/run-*.sh
+frontend/vibe-coding-ui/.playwright-cli/
+
+# Root static export artifacts (Next.js source is maintained in frontend/vibe-coding-ui/)
+_next/
+_not-found/
+/404.html
+/index.html
+/index.txt
+/_not-found.html
+/_not-found.txt
+/__next.*
+/.nojekyll
+/shoes/
+/fonts/
+/favicon.ico
+/shoe_test.jpg
+/file.svg
+/globe.svg
+/next.svg
+/vercel.svg
+/window.svg
+
 
 
