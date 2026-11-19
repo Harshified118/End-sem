@@ -54,6 +54,7 @@ models/*.joblib
 *.mp4
 
 # Test artifacts & agent scratch files
+vercel-deploy/
 .playwright-mcp/
 .superpowers/
 docs/superpowers/
